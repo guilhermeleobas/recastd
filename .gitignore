@@ -27,3 +27,8 @@
 *.exe
 *.out
 *.app
+
+# Misc
+.DS_Store
+traces/*
+bazel*
