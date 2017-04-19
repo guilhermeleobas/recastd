@@ -1,33 +1,41 @@
 #include "encounter.hpp"
-#include "simple_graph.hpp"
 #include <iostream>
 
 using namespace std;
 
-void find_encounters (const simple_graph& g){
-  // for each encounter
-}
+typedef unsigned uint;
 
-int main (){
-  
-  simple_graph g(2000);
+vector<encounter> read_encounters (){
   vector<encounter> v;
   
   ios::sync_with_stdio(false);
   cin.tie(NULL);
   
-  while (true){
-    unsigned s, t, tf, ti, delta;
-    
+  uint min_tf = 0x3f3f3f3f;
+  
+  while(true){
+    uint s, t, tf, ti, delta;
     cin >> s >> t >> tf >> ti >> delta;
-    
     if (not cin)
       break;
+    v.push_back (encounter(s, t, tf, ti, delta));
     
-    g[s].push_back (encounter (s, t, tf, ti));
-    g[t].push_back (encounter (t, s, tf, ti));
-    v.push_back (encounter (s, t, tf, ti));
+    min_tf = min(min_tf, tf);
   }
+  
+  // apply min_tf to each value in vector<encounter>
+  std::for_each(v.begin(), v.end(),
+    [min_tf] (encounter e){
+      e.set_day(min_tf); 
+    }
+  );
+  
+  return v;
+}
 
+int main (){
+  
+  vector<encounter> v = read_encounters();
+  
   return 0;
 }

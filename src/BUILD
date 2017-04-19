@@ -10,10 +10,11 @@ cc_library (
   hdrs = ["encounter.hpp"],
 )
 
+
 cc_library (
-  name = "simple_graph",
-  srcs = [],
-  hdrs = ["simple_graph.hpp"],
+  name = "graph_methods",
+  srcs = ["graph_methods.cpp"],
+  hdrs = ["graph_methods.hpp"],
 )
 
 cc_binary(
@@ -22,7 +23,7 @@ cc_binary(
   deps = [
     ":graph",
     ":encounter",
-    ":simple_graph"
+    ":graph_methods",
   ],
   copts = ["-std=c++11", "-Wall", "-Wextra", "-O2"]
 )
