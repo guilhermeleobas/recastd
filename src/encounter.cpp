@@ -46,6 +46,15 @@ uint encounter::get_ti() const{
   return this->ti;
 }
 
+
+void encounter::set_ti(uint ti){
+  this->ti = ti;
+}
+
+void encounter::set_tf(uint tf){
+  this->tf = tf;
+}
+
 uint encounter::get_delta() const{
   return this->delta;
 }
@@ -69,10 +78,12 @@ edge encounter::get_reverse_edge() const {
 }
 
 bool encounter::operator == (const encounter& other) const{
-  return (this->s == other.get_s() and 
-    this->t == other.get_t() and
-    this->ti == other.get_ti() and
-    this->tf == other.get_tf());
+  bool match_nodes = false;
+
+  if ((s == other.get_s() and t == other.get_t()) or (s == other.get_t() and t == other.get_s()))
+    match_nodes = true;
+
+  return (match_nodes and ti == other.get_ti() and tf == other.get_tf());
 }
 
 std::ostream& operator<< (std::ostream &out, const encounter &e){

@@ -36,18 +36,28 @@ struct orderByTf {
 */
 class pqueue : public multiset<encounter, orderByTf> {
 public:
-  void remove_unvalid_intervals (const encounter& enc);
-  iterator insert (const value_type& val);
+  vector<encounter> remove_unvalid_intervals (const encounter& enc);
+  vector<encounter> insert (const value_type& val);
   void print() const;
 };
+
+// -====-
 
 class line_sweep {
 private:
   map<node, set<node>> node_map;
-  map<edge, vector<encounter>> encounter_map;
+  map<edge, encounter> encounter_map;
+  pqueue pq;
 public:
   line_sweep();
+  bool can_merge (const encounter& enc1, const encounter& enc2) const;
   vector<encounter> find_contacts (const encounter& e1);
   void add_encounter(const encounter& enc1);
   void delete_encounter(const encounter& enc1);
+  encounter get_encounter (const pair<node, node>& e);
+  set<node> get_nodes (const node& node);
+
+  const pqueue get_pqueue() const;
+
+  void print_node_map() const;
 };

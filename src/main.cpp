@@ -1,3 +1,4 @@
+#include "debug.hpp"
 #include "encounter.hpp"
 #include "graph.hpp"
 #include "methods.hpp" // pqueue
@@ -9,33 +10,14 @@ using namespace std;
 
 typedef unsigned uint;
 
-map<node, unordered_set<node>> node_map;
-map<edge, unordered_set<encounter, encounter::hash>> encounter_map;
-
-
-void print_node_map() {
-  for (auto&& it : node_map){
-    cout << it.first << ": ";
-    for (auto&& i : it.second)
-      cout << i << ' ';
-    cout << endl;
-  }
-}
-
-void print_encounter_map(){
-  for (auto&& it : encounter_map){
-    cout << it.first.first << " <-> " << it.first.second << ": \n";
-    for (auto&& i : it.second)
-      cout << '\t' << i << '\n';
-    cout << endl;
-  }
-}
-
 void set_min_max (const vector<encounter>& v){
-  for (auto&& e : v){
-    min_tf = min (min_tf, e.get_tf());
-    min_ti = min (min_ti, e.get_ti());
-  }
+  // for (auto&& e : v){
+  //   min_tf = min (min_tf, e.get_tf());
+  //   min_ti = min (min_ti, e.get_ti());
+  // }
+
+  min_ti = v[0].get_ti();
+  min_tf = v[0].get_tf();
 
   cout << "-----\n";
   cout << "min_ti: " << min_ti << endl;
@@ -45,6 +27,48 @@ void set_min_max (const vector<encounter>& v){
 void set_day(vector<encounter>& v){
   for (auto&& e : v)
     e.set_day();
+}
+
+vector<encounter> merge_encounters (vector<encounter>& v){
+  sort (v.begin(), v.end(),
+  [](const encounter& e1, const encounter& e2) mutable -> bool {
+    if (e1.get_s() == e2.get_s() and e1.get_t() == e2.get_t() and e1.get_ti() == e2.get_ti())
+      return e1.get_tf() < e2.get_tf();
+
+    if (e1.get_s() == e2.get_s() and e1.get_t() == e2.get_t())
+      return e1.get_ti() < e2.get_ti();
+
+    if (e1.get_s() == e2.get_s())
+      return e1.get_t() < e2.get_t();
+
+    return e1.get_s() < e2.get_s();
+  });
+
+  vector<encounter> novo;
+  novo.push_back (v[0]);
+
+  for (uint i=1; i<v.size(); i++){
+    encounter e0 = novo.back();
+    if (e0.get_s() == v[i].get_s() and 
+        e0.get_t() == v[i].get_t() and
+        e0.get_tf() == v[i].get_ti()){
+      // can merge
+      if (DEBUG)
+        cout << "[merge] prev: " << e0 << endl;
+
+      e0.set_tf(v[i].get_tf());
+      novo.pop_back();
+      novo.push_back (e0);
+
+      if (DEBUG)
+        cout << "[merge] novo: " << novo.back() << endl;
+    }
+    else{
+      novo.push_back (v[i]);
+    }
+  }
+
+  return novo;
 }
 
 vector<encounter> read_encounters (){
@@ -58,10 +82,22 @@ vector<encounter> read_encounters (){
     cin >> s >> t >> tf >> ti >> delta;
     if (not cin)
       break;
+
+    if (s > t)
+      swap (s, t);
     
     v.push_back (encounter(s, t, tf, ti, delta));
     
   }
+
+  v = merge_encounters(v);
+
+  sort(v.begin(), v.end(), 
+  [](const encounter& e1, const encounter& e2) mutable -> bool {
+    if (e1.get_ti() == e2.get_ti())
+      return e1.get_tf() < e2.get_tf();
+    return e1.get_ti() < e2.get_ti();
+  });
 
   set_min_max(v);
   set_day(v);
@@ -163,80 +199,6 @@ void match_encounters (
   }
 }
 
-map<node, graph> build_graph (){
-  // get a list of nodes
-  vector<node> nodes;
-
-  for_each (begin(node_map), end(node_map),
-    [&nodes] (const pair<node, unordered_set<node>> &i) mutable {
-      nodes.push_back(i.first);
-    });
-
-  map<node, graph> graphs;
-
-  for (node n : nodes){
-    // for every node a: create a graph
-    graphs[n] = graph(n);
-  }
-
-  for (node a : nodes){
-    // iterate over every neighbor a -> b
-    for (node b : node_map[a]){
-      // iterate over every encounter in encounter_map[edge(a, b)]
-      for (auto&& enc : encounter_map[make_pair(a, b)]){
-        // add encounters to the graph g(a);
-        // graphs[b] will add this same edge in a future iteration 
-        graphs[a].add_edge(enc);
-      }
-    }
-    cout << endl;
-  }
-
-  for (node a : nodes){
-    for (node b : node_map[a]){
-      for (node c : node_map[b]){
-        // unordered_set<encounter, encounter::hash>...
-        auto us0 = encounter_map[make_pair(a, b)];
-        auto us1 = encounter_map[make_pair(b, c)];
-        auto us2 = encounter_map[make_pair(c, a)];
-
-        match_encounters (a, b, c, graphs, us0, us1, us2);
-      }
-    }
-    
-  }
-
-  for (auto&& it : graphs){
-    cout << "dumping graph for node: " << it.first << endl;
-    it.second.dump();
-    cout << endl;
-  }
-
-  return graphs;
-
-}
-
-void map_nodes (const vector<encounter> &v){
-
-  // edges are undirected
-  for (auto&& e : v){
-    node_map[e.get_s()].insert (e.get_t());
-    node_map[e.get_t()].insert (e.get_s());
-  }
-
-}
-
-void map_encounters (const vector<encounter> &v){
-  
-  // edges are undirected
-  for (auto&& e : v){
-    uint s = e.get_s(), t = e.get_t();
-    encounter_map[make_pair(s, t)].insert(e);
-    encounter_map[make_pair(t, s)].insert(e);
-  }
-}
-
-
 
 int main (int argc, char* argv[]){
 
@@ -261,79 +223,28 @@ int main (int argc, char* argv[]){
     exit(1);
   }
 
-  pqueue pq;
+  // pqueue pq;
 
-  pq.insert (encounter (1, 2, 12, 0, 12));
-  pq.insert (encounter (10, 20, 12, 0, 12));
+  // pq.insert (encounter (1, 2, 12, 0, 12));
+  // pq.insert (encounter (10, 20, 12, 0, 12));
 
-  pq.insert (encounter (2, 3, 3, 1, 2));
-  pq.insert (encounter (2, 3, 5, 4, 1));
-  pq.insert (encounter (2, 3, 8, 6, 2));
-  pq.insert (encounter (1, 3, 10, 7, 3));
-  pq.insert (encounter (2, 3, 11, 9, 2));
-
-
-  pq.print();
-
+  // pq.insert (encounter (2, 3, 3, 1, 2));
+  // pq.insert (encounter (2, 3, 5, 4, 1));
+  // pq.insert (encounter (2, 3, 8, 6, 2));
+  // pq.insert (encounter (1, 3, 10, 7, 3));
+  // pq.insert (encounter (2, 3, 11, 9, 2));
 
   
-  // vector<encounter> v = read_encounters();
-  // map_nodes(v);
-  // map_encounters(v);
-
-  // sort(v.begin(), v.end(), 
-  //   [](const encounter& e1, const encounter& e2) mutable -> bool {
-  //     if (e1.get_ti() == e2.get_ti())
-  //       return e1.get_tf() < e2.get_tf();
-  //     return e1.get_ti() < e2.get_ti();
-  //   });
-
-  // map<int, int> m;
-
-  // for (int i=0; i<v.size(); i++){
-  //   vector<encounter>::iterator it = upper_bound(v.begin()+i+1, v.end(), v[i], 
-  //     [] (const encounter& e1, const encounter& e2) -> bool {
-  //       return e1.get_tf() < e2.get_ti();
-  //     });
-  //     cout << v[i] << ' ' << it - v.begin() - i - 1 << endl;
-  // }
-
-  // for (auto it : m){
-  //   cout << it.first << ' ' << it.second << endl;
-  // }
-
-  // vector<encounter> v;
-
-  // v.push_back (encounter (1, 2, 4, 3, 1));
-  // v.push_back (encounter (1, 2, 6, 3, 3));
-  
-  // v.push_back (encounter (1, 3, 10, 2, 8));
-  // v.push_back (encounter (3, 4, 8, 5, 3));
-  // v.push_back (encounter (4, 1, 6, 4, 2));
-
-  // set_min_max(v);
-  // set_day(v);
-
-  // map_nodes(v);
-  // map_encounters(v);
-
-  // cout << "------\n";
-  // print_node_map();
-  // cout << "------\n";
-  // print_encounter_map();
-  // cout << "------\n";
-  // build_graph();
+  vector<encounter> v = read_encounters();
 
 
-  // graph g (1);
 
-  // g.add_edge (v[0]);
-  // g.add_edge (v[1]);
+  line_sweep ls;
 
-  // g.add_edge (v[2], v[3], v[4]);
+  for (auto&& e : v){
+    ls.add_encounter(e);
+  }
 
-
-  // g.dump();
 
 
   return 0;

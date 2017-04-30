@@ -3,23 +3,22 @@ package(default_visibility = ["//visibility:public"])
 cc_library (
   name = "encounter",
   srcs = ["encounter.cpp"],
-  hdrs = ["encounter.hpp"],
+  hdrs = ["encounter.hpp", "debug.hpp"],
 )
 
 cc_library (
   name = "methods",
   srcs = ["methods.cpp"],
-  hdrs = ["methods.hpp"],
+  hdrs = ["methods.hpp", "debug.hpp"],
   deps = [
     ":encounter",
   ],
-  visibility = ["//test:__pkg__",],
 )
 
 cc_library (
   name = "graph",
   srcs = ["graph.cpp"],
-  hdrs = ["graph.hpp"],
+  hdrs = ["graph.hpp", "debug.hpp"],
   deps = [
     ":encounter",
   ],
