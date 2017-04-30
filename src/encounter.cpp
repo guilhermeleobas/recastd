@@ -46,6 +46,10 @@ uint encounter::get_ti() const{
   return this->ti;
 }
 
+uint encounter::get_delta() const{
+  return this->delta;
+}
+
 
 uint encounter::get_s() const{
   return this->s;
@@ -72,7 +76,7 @@ bool encounter::operator == (const encounter& other) const{
 }
 
 std::ostream& operator<< (std::ostream &out, const encounter &e){
-  out << e.get_s() << " <-> " << e.get_t() << " : " << '[' << e.get_ti() << "," << e.get_tf() 
+  out << e.get_s() << " <-> " << e.get_t() << "\ttime window: " << '[' << e.get_ti() << "," << e.get_tf() 
       << "] day window: [" << e.get_min_day() << '-' << e.get_max_day() << "]" ;
   return out;
 }

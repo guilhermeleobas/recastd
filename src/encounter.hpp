@@ -32,6 +32,8 @@ public:
   
   uint get_tf() const;
   uint get_ti() const;
+
+  uint get_delta() const;
   
   uint get_s() const;
   uint get_t() const;

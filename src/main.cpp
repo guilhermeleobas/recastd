@@ -1,5 +1,6 @@
 #include "encounter.hpp"
 #include "graph.hpp"
+#include "methods.hpp" // pqueue
 #include <iostream>
 #include <map>
 #include <unordered_set>
@@ -259,14 +260,47 @@ int main (int argc, char* argv[]){
     cerr << "./recast < input\n";
     exit(1);
   }
-  
-  vector<encounter> v = read_encounters();
-  map_nodes(v);
-  map_encounters(v);
 
-  for (auto&& it : encounter_map){
-    cout << it.first.first << '/' << it.first.second << ' ' << it.second.size() << endl;
-  }
+  pqueue pq;
+
+  pq.insert (encounter (1, 2, 12, 0, 12));
+  pq.insert (encounter (10, 20, 12, 0, 12));
+
+  pq.insert (encounter (2, 3, 3, 1, 2));
+  pq.insert (encounter (2, 3, 5, 4, 1));
+  pq.insert (encounter (2, 3, 8, 6, 2));
+  pq.insert (encounter (1, 3, 10, 7, 3));
+  pq.insert (encounter (2, 3, 11, 9, 2));
+
+
+  pq.print();
+
+
+  
+  // vector<encounter> v = read_encounters();
+  // map_nodes(v);
+  // map_encounters(v);
+
+  // sort(v.begin(), v.end(), 
+  //   [](const encounter& e1, const encounter& e2) mutable -> bool {
+  //     if (e1.get_ti() == e2.get_ti())
+  //       return e1.get_tf() < e2.get_tf();
+  //     return e1.get_ti() < e2.get_ti();
+  //   });
+
+  // map<int, int> m;
+
+  // for (int i=0; i<v.size(); i++){
+  //   vector<encounter>::iterator it = upper_bound(v.begin()+i+1, v.end(), v[i], 
+  //     [] (const encounter& e1, const encounter& e2) -> bool {
+  //       return e1.get_tf() < e2.get_ti();
+  //     });
+  //     cout << v[i] << ' ' << it - v.begin() - i - 1 << endl;
+  // }
+
+  // for (auto it : m){
+  //   cout << it.first << ' ' << it.second << endl;
+  // }
 
   // vector<encounter> v;
 

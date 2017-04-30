@@ -1,7 +1,19 @@
+package(default_visibility = ["//visibility:public"])
+
 cc_library (
   name = "encounter",
   srcs = ["encounter.cpp"],
   hdrs = ["encounter.hpp"],
+)
+
+cc_library (
+  name = "methods",
+  srcs = ["methods.cpp"],
+  hdrs = ["methods.hpp"],
+  deps = [
+    ":encounter",
+  ],
+  visibility = ["//test:__pkg__",],
 )
 
 cc_library (
@@ -10,7 +22,7 @@ cc_library (
   hdrs = ["graph.hpp"],
   deps = [
     ":encounter",
-  ]
+  ],
 )
 
 cc_binary(
@@ -19,6 +31,7 @@ cc_binary(
   deps = [
     ":graph",
     ":encounter",
+    ":methods",
   ],
   copts = ["-std=c++14", "-Wall", "-Wextra", "-O2"]
 )

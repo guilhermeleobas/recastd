@@ -1,6 +1,14 @@
+cc_library (
+  name = "main",
+  srcs = ["main.cpp"],
+)
+
 cc_test (
-  name = "module_test",
-  src = [
-    "test.cc",
-  ],)
+  name = "methods-test",
+  srcs = ["methods.cpp", "catch.hpp"],
+  deps = [
+    ":main",
+    "//src:methods",
+  ],
+ )
 

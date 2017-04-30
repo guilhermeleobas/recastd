@@ -1,0 +1,10 @@
+
+root = true;
+
+[*.py]
+indent_style = space
+indent_size = 4
+
+[{src/*.cpp, src/*.hpp}]
+indent_style = space
+indent_size = 2
