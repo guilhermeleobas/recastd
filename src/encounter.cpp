@@ -59,6 +59,10 @@ uint encounter::get_delta() const{
   return this->delta;
 }
 
+void encounter::set_delta() {
+  delta = tf - ti;
+}
+
 
 uint encounter::get_s() const{
   return this->s;
@@ -87,7 +91,24 @@ bool encounter::operator == (const encounter& other) const{
 }
 
 std::ostream& operator<< (std::ostream &out, const encounter &e){
-  out << e.get_s() << " <-> " << e.get_t() << "\ttime window: " << '[' << e.get_ti() << "," << e.get_tf() 
-      << "] day window: [" << e.get_min_day() << '-' << e.get_max_day() << "]" ;
+  out << e.get_s() << ' ' << e.get_t() << ' ' << e.get_tf() << ' ' << e.get_ti() 
+      << ' ' << e.get_delta() << ' ' << e.get_min_day() << ' ' << e.get_max_day();
+  // out << e.get_s() << " <-> " << e.get_t() << "\ttime window: " << '[' << e.get_ti() << "," << e.get_tf() 
+  //     << "] day window: [" << e.get_min_day() << '-' << e.get_max_day() << "]" ;
   return out;
+}
+
+bool can_merge (const encounter& e1, const encounter& e2){
+  return (
+    e1.get_s() == e2.get_s() and
+    e1.get_t() == e2.get_t() and
+    e1.get_tf() == e2.get_ti()
+  );
+}
+
+encounter merge (const encounter& e1, const encounter& e2){
+  encounter novo = e1;
+  novo.set_tf(e2.get_tf());
+  novo.set_delta();
+  return novo;
 }

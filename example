@@ -1,0 +1,70 @@
+a -> b -> c -> a
+
+
+a -> b		- 2 3 4 5 6 7 8 9 10
+b -> c		- - - - 5 6 7 - - --
+a -> c	  	1 2 3 4 5 - - - - --
+
+ti(bc) <= tf(ab) || ti(ab) <= tf(bc)
+
+
+ti(bc) <= tf(ab)
+
+i  f
+----
+   -----
+   i   f
+
+ti(bc) <= tf(ab)
+
+i      f
+--------
+  ---
+  i f
+
+i    f
+------
+       ------
+       i	f
+
+a -> b		- - - - - - - 8 9 10
+b -> c		- - - 4 5 6 - - - --
+a -> c	  	- - - - 5 6 7 8 - --
+
+bool match = false;
+
+if (t0 == s1 and t1 == s2 and t2 == s0)
+	match = true;
+
+if (t0 == s1 and t1 == t2 and s2 == s0)
+	match = true;
+
+if (t0 == t1 and s1 == s2 and t2 == s0)
+	match = true;
+
+if (t0 == t1 and s1 == t2 and s2 == s0)
+	match = true;
+
+if (!match)
+	return false;
+
+s0 -> t0/s1 -> t1/s2 -> t2/s0;
+s0 -> t0/s1 -> t1/t2 -> s2/s0;
+
+s0 -> t0/t1 -> s1/s2 -> t2/s0;
+s0 -> t0/t1 -> s1/t2 -> s2/s0;
+
+t0 -> s0/s1 -> t1/s2 -> t2/t0;
+t0 -> s0/s1 -> t1/t2 -> s2/t0;
+
+t0 -> s0/t1 -> s1/s2 -> t2/t0;
+t0 -> s0/t1 -> s1/t2 -> s2/t0;
+
+
+
+
+
+
+
+
+

@@ -1,5 +1,6 @@
 package(default_visibility = ["//visibility:public"])
 
+
 cc_library (
   name = "encounter",
   srcs = ["encounter.cpp"],
@@ -15,6 +16,25 @@ cc_library (
   ],
 )
 
+cc_library(
+  name = "pqueue",
+  srcs = ["pqueue.cpp"],
+  hdrs = ["pqueue.hpp", "debug.hpp"],
+  deps = [
+    ":encounter",
+  ]
+)
+
+cc_library(
+  name = "linesweep",
+  srcs = ["linesweep.cpp"],
+  hdrs = ["linesweep.hpp", "debug.hpp"],
+  deps = [
+    ":encounter",
+    ":pqueue",
+  ]
+)
+
 cc_library (
   name = "graph",
   srcs = ["graph.cpp"],
@@ -28,6 +48,8 @@ cc_binary(
   name = "recast",
   srcs = ["main.cpp"],
   deps = [
+    "pqueue",
+    "linesweep",
     ":graph",
     ":encounter",
     ":methods",

@@ -37,6 +37,7 @@ public:
   void set_tf(uint);
 
   uint get_delta() const;
+  void set_delta();
   
   uint get_s() const;
   uint get_t() const;
@@ -60,4 +61,8 @@ public:
   
   
   friend std::ostream& operator<< (std::ostream &out, const encounter&);
+
 };
+
+bool can_merge (const encounter& e1, const encounter& e2);
+encounter merge (const encounter& e1, const encounter& e2);

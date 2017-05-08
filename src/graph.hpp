@@ -3,6 +3,7 @@
 #include <vector>
 #include <unordered_set>
 #include <map>
+#include <fstream>
 
 #include "encounter.hpp"
 
@@ -30,6 +31,6 @@ public:
   map<node, unordered_set<encounter, encounter::hash>>::size_type size() const;
 
 
-  void dump();
+  void dump(ofstream& f);
   
 };
