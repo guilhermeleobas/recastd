@@ -66,9 +66,9 @@ map<node, graph> build_graphs(const vector<encounter> &v){
     }
 
     for (const node c : nodes){
-      const encounter e0 = ls.get_encounter(a, b);
-      const encounter e1 = ls.get_encounter(a, c);
-      const encounter e2 = ls.get_encounter(b, c);
+      const reference_wrapper<const encounter> e0 = ls.get_encounter(a, b);
+      const reference_wrapper<const encounter> e1 = ls.get_encounter(a, c);
+      const reference_wrapper<const encounter> e2 = ls.get_encounter(b, c);
 
       mapa[a].add_edge(e0, e1, e2);
       mapa[b].add_edge(e0, e1, e2);
@@ -90,7 +90,7 @@ bool parse_arguments (int argc, char* argv[]){
       timestep = atoi(argv[i+1]);
       cout << "[INFO] Setting timestep to: " << timestep << '\n';
     }
-    else if (arg == "-o" || arg == "--output"){
+    else if (arg == "-o" || arg == "--output" || arg=="-out"){
       filename = string(argv[i+1]);
       cout << "[INFO] Setting filename to: " << filename << '\n';
     }
@@ -139,7 +139,7 @@ int main (int argc, char *argv[]){
   map<node, graph> mapa = build_graphs(v);
 
   for (auto&& it : mapa){
-    cout << "dumping: " << it.first << endl;
+    // cout << "dumping: " << it.first << endl;
     ofstream f;
     f.sync_with_stdio(false);
     f.tie(NULL);

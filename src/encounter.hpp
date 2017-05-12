@@ -3,6 +3,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <iostream>
 
 using namespace std;
 
@@ -22,6 +23,9 @@ private:
 public:
   
   encounter();
+  // ~encounter(){
+  //   std::cout << "Destruindo " << *this << '\n';
+  // }
   encounter (uint, uint, uint, uint, uint);
   
   void set_day ();
@@ -56,6 +60,18 @@ public:
         hash<uint>()(enc.get_t())  ^
         hash<uint>()(enc.get_ti()) ^
         hash<uint>()(enc.get_tf());
+    }
+  };
+
+  struct my_compare{
+  public:
+    bool operator () (const encounter& a, const encounter& b){
+      bool match_nodes = false;
+
+      if ((a.get_s() == b.get_s() and a.get_t() == b.get_t()) or (a.get_s() == b.get_t() and a.get_t() == b.get_s()))
+        match_nodes = true;
+
+      return (match_nodes and a.get_ti() == b.get_ti() and a.get_tf() == b.get_tf());
     }
   };
   

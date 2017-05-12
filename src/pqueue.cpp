@@ -15,12 +15,12 @@ bool orderByTf::operator()(const encounter &e1, const encounter &e2) const{
   return e1.get_tf() < e2.get_tf();
 }
 
-vector<encounter> pqueue::remove_unvalid_intervals (const encounter& e1){
-  vector<encounter> v;
+vector<reference_wrapper<const encounter>> pqueue::remove_unvalid_intervals (const encounter& e1){
+  vector<reference_wrapper<const encounter>> v;
   while (not this->empty()){
-    const encounter& topo = *(this->begin());
+    const reference_wrapper<const encounter>& topo = *(this->begin());
 
-    if (topo.get_tf() < e1.get_ti()){
+    if (topo.get().get_tf() < e1.get_ti()){
       if (DEBUG)
         cout << "\t[Pqueue] removeu: " << topo << endl;
 
@@ -35,11 +35,11 @@ vector<encounter> pqueue::remove_unvalid_intervals (const encounter& e1){
   return v;
 }
 
-vector<encounter> pqueue::insert (const pqueue::value_type& e1){
+vector<reference_wrapper<const encounter>> pqueue::insert (const pqueue::value_type& e1){
   if (DEBUG)
     cout << "\t[Pqueue] adicionando: " << e1 << endl;
 
-  vector<encounter> v = this->remove_unvalid_intervals(e1);
+  vector<reference_wrapper<const encounter>> v = this->remove_unvalid_intervals(e1);
   multiset::insert(e1);
   return v;
 }

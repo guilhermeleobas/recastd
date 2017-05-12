@@ -3,6 +3,7 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <functional>
 
 
 #include "encounter.hpp"
@@ -34,9 +35,9 @@ struct orderByTf {
  * 
  * Intervals are sorted in creasing way using "tf" as parameter (orderByTf).
 */
-class pqueue : public multiset<encounter, orderByTf> {
+class pqueue : public multiset<reference_wrapper<const encounter>, orderByTf> {
 public:
-  vector<encounter> remove_unvalid_intervals (const encounter& enc);
-  vector<encounter> insert (const value_type& val);
+  vector<reference_wrapper<const encounter>> remove_unvalid_intervals (const encounter& enc);
+  vector<reference_wrapper<const encounter>> insert (const value_type& val);
   void print() const;
 };
