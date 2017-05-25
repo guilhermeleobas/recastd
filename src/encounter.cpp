@@ -15,6 +15,11 @@ encounter::encounter(uint s, uint t, uint tf, uint ti, uint delta)
     day(0), min_day(0), max_day(0x3f3f3f3f)
   {}
 
+encounter::encounter(uint s, uint t, uint tf, uint ti, uint delta, uint day_i, uint day_f) 
+  : s(s), t(t), tf(tf), ti(ti), delta(delta), 
+    day(0), min_day(day_i), max_day(day_f)
+  {}
+  
 uint encounter::get_day() const{
   return this->day;
 }

@@ -1,10 +1,17 @@
 package(default_visibility = ["//visibility:public"])
 
-
 cc_library (
   name = "encounter",
   srcs = ["encounter.cpp"],
   hdrs = ["encounter.hpp", "debug.hpp"],
+)
+
+cc_library(
+  name = "parser",
+  srcs = ["parser.cpp"],
+  deps = [
+    ":encounter",
+  ]
 )
 
 cc_library (

@@ -26,7 +26,8 @@ public:
   // ~encounter(){
   //   std::cout << "Destruindo " << *this << '\n';
   // }
-  encounter (uint, uint, uint, uint, uint);
+  encounter (uint s, uint t, uint tf, uint ti, uint delta);
+  encounter (uint s, uint t, uint tf, uint ti, uint delta, uint day_i, uint day_f);
   
   void set_day ();
   uint get_day() const;

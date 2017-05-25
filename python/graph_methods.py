@@ -9,28 +9,42 @@ ti = 3
 delta = 4
 day_i = 5
 day_f = 6
-
-# discretize the input graph using the timestep as a window.
-def discrete(arr):
+weight = 2
+    
+def discrete(f):
     
     d = dict()
-
-    for day in range (1, 29):
+    
+    # for enc in f:
+    #     for day in range(int(enc[day_i]), int(enc[day_f])+1):
+    #         if (enc[s], enc[t], day) not in d:
+    #             d[(enc[s], enc[t],str(day))] = 1
+    #         else:
+    #             d[(enc[s], enc[t], str(day))] += 1
+                
+    # out = dict()
+    
+    # for i in range(0, 29):
+    #     out[str(i)] = []
+        
+    # for (ss, tt, day), v in d.iteritems():
+    #     out[day].append([ss, tt, str(v)])
+        
+    # return out
+        
+    for day in range (0, 29):
         d[day] = []
-
-    for i in arr:
-        for day in range(1, 29):
+    
+    for i in f:
+        for day in range(0, 29):
             if day >= int(i[day_i]) and day <= int(i[day_f]):
                 d[day].append(i)
-        
-    print ('keys generated:')
-    print (d.keys())
     
     return d
 
 def combine_graphs (graphs):
 
-    print ('--- Combining graphs')
+    # print ('--- Combining graphs')
     return reduce (lambda x, y: nx.compose (x, y), graphs.values())
 
 def get_temporal_accumulator_graphs(temporal_graphs):
@@ -38,50 +52,38 @@ def get_temporal_accumulator_graphs(temporal_graphs):
 
     g = nx.Graph()
 
-    iter = 0
-
     for key, graph in temporal_graphs.iteritems():
         g = nx.compose(g, graph)
         temporal_accumulator_graphs[key] = g
 
-        iter += 1
-        if iter >= max_iter:
-            break
-
     return temporal_accumulator_graphs
 
-def get_temporal_graphs (f, timestep):
+def get_temporal_graphs (f):
 
-    g = nx.parse_edgelist (f, 
-                           nodetype=int, 
-                           data=(('tf', int), ('ti', int), ('delta', int), ('day_i', int), ('day_f', int)))
-
-    d = discrete(f, timestep)
+    d = discrete(f)
     
     temporal_graphs = dict()
 
-    max_iteration = 28
-    iteration = 0
-    
     for k, v in d.iteritems():
         
         # nx.parse_edgelist requires a list of strings
         # where each element (string) represents a tuple:
         # node_from, node_to, time_begin, time_end
         arr = map(lambda x: ' '.join(x), v)
+        
         try:
-            # USC
-            egraph = nx.parse_edgelist (arr, nodetype=int, data=( 
-                ('tf', int), ('ti', int), ('delta', int), ('day_i', int), ('day_f', int) ) )
+            egraph = nx.parse_edgelist (arr, 
+                                       nodetype=int, 
+                                       data=(('tf', int), ('ti', int), ('delta', int), ('day_i', int), ('day_f', int)),
+                                       create_using=nx.Graph())
         except:
-            # dartmouth
-            try:
-                egraph = nx.parse_edgelist (arr, nodetype=int, data=( ('tf', int), ('ti', int), ('delta', int), ('x1', int), ('y1', int), ('x2', int), ('y2', int) ) )
-            except:
-                # small graph just for test purposes
-                egraph = nx.parse_edgelist (arr, nodetype=int, data=( ('tf', int), ('ti', int), ('x1', float), ('y1', float), ('x2', float), ('y2', float) ) )
+            egraph = nx.parse_edgelist(arr,
+                                       nodetype=int,
+                                       data=(('weight', int), ),
+                                       create_using=nx.Graph())
+
         temporal_graphs[k] = egraph
         
-        print 'generated event graph [#edges = {}] for timestep {}'.format(egraph.size(), k)
+        # print 'generated event graph [#edges = {}] for timestep {}'.format(egraph.size(), k)
     
     return temporal_graphs

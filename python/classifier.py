@@ -45,7 +45,7 @@ def set_delta(random_graphs, temporal_graphs):
             l.append( graph.get_edge_data(s, t)['delta'] )
             aux.append( graph.get_edge_data(s, t)['delta'] )
 
-    print ("before len(t) = {}".format(len(l)))
+    # print ("before len(t) = {}".format(len(l)))
 
     shuffle(l)
     shuffle(aux)
@@ -60,11 +60,14 @@ def set_delta(random_graphs, temporal_graphs):
                 x = l.popleft()
             graph[s][t]['delta'] = x
 
-    print ("after len(t) = {}".format(len(l)))
+    # print ("after len(t) = {}".format(len(l)))
 
 
 def calc_ecdf(observations, linspace=None):
+    # print ("chegou aqui\n")
+    # print (observations)
     observations = np.array(observations)
+
 
     observations.sort()
 
@@ -106,11 +109,11 @@ def edge_persistence(l_graphs):
                 ep[(y, x)] = 1
 
     # print ("#edges = {}".format(len(ep.keys()))) ==> 66876
-    print ("#edges = {}".format(len(ep.keys())))
+    # print ("#edges = {}".format(len(ep.keys())))
     for k, v in ep.iteritems():
         ep[k] = (v+0.0)/t
 
-    print ("#edges = {}".format(len(ep.keys())))
+    # print ("#edges = {}".format(len(ep.keys())))
     return ep
 
 def topological_overlap(agg_tgraph):
@@ -127,7 +130,7 @@ def topological_overlap(agg_tgraph):
         num = len(ni.intersection(nj))
         den = len(ni.union(nj))
 
-        x = (num + 0.0)/((len(ni) - 1) + (len(nj) - 1) - num)
+        # x = (num + 0.0)/((len(ni) - 1) + (len(nj) - 1) - num)
 
         # print 'nodes {}-{} with {}/{}'.format(i, j, num, den)
         
@@ -193,7 +196,7 @@ def classify_ep(ep, random_ep, p_rnd):
             cr += 1
             rep[edge] = random
 
-    print 'cr = {}/{}'.format(cr, len(ep))
+    # print 'cr = {}/{}'.format(cr, len(ep))
 
     return rep
     
@@ -228,12 +231,12 @@ def classify_relationships(rep, rto):
     return relations
 
 def get_ep (temporal_graphs):
-    print 'generating edge_persistence'
+    # print 'generating edge_persistence'
     ep = edge_persistence (temporal_graphs)
     return ep
 
 def get_to (aggregate_graph):    
-    print 'generating topological overlap'
+    # print 'generating topological overlap'
     to = topological_overlap (aggregate_graph)
     return to
 
