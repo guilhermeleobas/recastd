@@ -40,7 +40,8 @@ void graph::add_edge (const reference_wrapper<const encounter>& enc0, const refe
 void graph::dump (ofstream& f) {
   
   for (const reference_wrapper<const encounter>& e : g){
-    f << e.get() << '\n';
+    // f << e.get() << '\n';
+    e.get().print(f, person);
   }
   f.close();
 }

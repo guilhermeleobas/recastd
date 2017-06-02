@@ -52,7 +52,7 @@ cc_library (
 )
 
 cc_binary(
-  name = "recast",
+  name = "recastd",
   srcs = ["main.cpp"],
   deps = [
     "pqueue",

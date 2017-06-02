@@ -14,23 +14,6 @@ weight = 2
 def discrete(f):
     
     d = dict()
-    
-    # for enc in f:
-    #     for day in range(int(enc[day_i]), int(enc[day_f])+1):
-    #         if (enc[s], enc[t], day) not in d:
-    #             d[(enc[s], enc[t],str(day))] = 1
-    #         else:
-    #             d[(enc[s], enc[t], str(day))] += 1
-                
-    # out = dict()
-    
-    # for i in range(0, 29):
-    #     out[str(i)] = []
-        
-    # for (ss, tt, day), v in d.iteritems():
-    #     out[day].append([ss, tt, str(v)])
-        
-    # return out
         
     for day in range (0, 29):
         d[day] = []

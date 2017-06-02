@@ -4,6 +4,7 @@
 #include <map>
 #include <set>
 #include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -49,6 +50,8 @@ public:
  
   edge get_edge() const;
   edge get_reverse_edge() const;
+  
+  void print(ofstream&, const uint&) const;
 
   bool operator == (const encounter&) const;
 

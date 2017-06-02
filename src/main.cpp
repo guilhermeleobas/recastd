@@ -139,7 +139,7 @@ int main (int argc, char *argv[]){
   map<node, graph> mapa = build_graphs(v);
 
   for (auto&& it : mapa){
-    // cout << "dumping: " << it.first << endl;
+    cout << "dumping: " << it.first << endl;
     ofstream f;
     f.sync_with_stdio(false);
     f.tie(NULL);

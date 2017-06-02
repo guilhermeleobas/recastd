@@ -1,6 +1,7 @@
 #include "encounter.hpp"
 
 #include <iostream>
+#include <sstream>
 #include <cmath>
 
 // definition of timestep;
@@ -84,6 +85,20 @@ edge encounter::get_edge() const {
 
 edge encounter::get_reverse_edge() const {
   return make_pair(this->t, this->s);
+}
+
+void encounter::print (ofstream& f, const uint& node) const {
+  
+  if (get_s() == node){
+    f << get_s() << ' ' << get_t() << ' ';
+  }
+  else{
+    f << get_t() << ' ' << get_s() << ' ';
+  }
+    
+  f << get_tf() << ' ' << get_ti() << ' ' << get_delta() 
+    << ' ' << get_min_day() << ' ' << get_max_day() << '\n';
+  
 }
 
 bool encounter::operator == (const encounter& other) const{
