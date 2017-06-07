@@ -118,6 +118,23 @@ std::ostream& operator<< (std::ostream &out, const encounter &e){
   return out;
 }
 
+bool can_merge (const weak_ptr<encounter>& e1, const weak_ptr<encounter>& e2){
+  auto se1 = e1.lock(), se2 = e2.lock();
+  return (
+      se1->get_s() == se2->get_s() and
+      se1->get_t() == se2->get_t() and
+      se1->get_tf() == se2->get_ti()
+      );
+}
+
+shared_ptr<encounter> merge (const weak_ptr<encounter>& e1, const weak_ptr<encounter>& e2){
+  auto se1 = e1.lock(), se2 = e2.lock();
+  auto novo = se1;
+  novo->set_tf(se2->get_tf());
+  novo->set_delta();
+  return novo;
+}
+
 bool can_merge (const encounter& e1, const encounter& e2){
   return (
     e1.get_s() == e2.get_s() and

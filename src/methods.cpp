@@ -8,7 +8,7 @@ using std::cout;
 using std::endl;
 using std::vector;
 
-void set_properties(vector<encounter>& v){
+void set_properties(vector<shared_ptr<encounter>>& v){
   merge_encounters(v);
   sort_encounters(v);
 
@@ -16,26 +16,26 @@ void set_properties(vector<encounter>& v){
   set_day(v);
 }
 
-void merge_encounters (vector<encounter>& v){
+void merge_encounters (vector<shared_ptr<encounter>>& v){
   sort (v.begin(), v.end(),
-  [](const encounter& e1, const encounter& e2) mutable -> bool {
-    if (e1.get_s() == e2.get_s() and e1.get_t() == e2.get_t() and e1.get_ti() == e2.get_ti())
-      return e1.get_tf() < e2.get_tf();
+  [](const shared_ptr<encounter>& e1, const shared_ptr<encounter>& e2) {
+    if (e1->get_s() == e2->get_s() and e1->get_t() == e2->get_t() and e1->get_ti() == e2->get_ti())
+      return e1->get_tf() < e2->get_tf();
 
-    if (e1.get_s() == e2.get_s() and e1.get_t() == e2.get_t())
-      return e1.get_ti() < e2.get_ti();
+    if (e1->get_s() == e2->get_s() and e1->get_t() == e2->get_t())
+      return e1->get_ti() < e2->get_ti();
 
-    if (e1.get_s() == e2.get_s())
-      return e1.get_t() < e2.get_t();
+    if (e1->get_s() == e2->get_s())
+      return e1->get_t() < e2->get_t();
 
-    return e1.get_s() < e2.get_s();
+    return e1->get_s() < e2->get_s();
   });
 
-  vector<encounter> novo;
+  vector<shared_ptr<encounter>> novo;
   novo.push_back (v[0]);
 
   for (uint i=1; i<v.size(); i++){
-    encounter e0 = novo.back();
+    shared_ptr<encounter> e0 = novo.back();
     if (can_merge(e0, v[i])){
       // can merge
       if (DEBUG)
@@ -55,19 +55,19 @@ void merge_encounters (vector<encounter>& v){
   v = novo;
 }
 
-void sort_encounters (vector<encounter>& v){
+void sort_encounters (vector<shared_ptr<encounter>>& v){
   sort (v.begin(), v.end(),
   
-  [](const encounter& e1, const encounter& e2) mutable -> bool {
-    if (e1.get_ti() == e2.get_ti())
-      return e1.get_tf() < e2.get_tf();
-    return e1.get_ti() < e2.get_ti();
+  [](const shared_ptr<encounter> &e1, const shared_ptr<encounter> &e2) mutable -> bool {
+    if (e1->get_ti() == e2->get_ti())
+      return e1->get_tf() < e2->get_tf();
+    return e1->get_ti() < e2->get_ti();
   });
 }
 
-void set_min_max (const vector<encounter>& v){
-  min_ti = v[0].get_ti();
-  min_tf = v[0].get_tf();
+void set_min_max (const vector<shared_ptr<encounter>>& v){
+  min_ti = v[0]->get_ti();
+  min_tf = v[0]->get_tf();
 
   if (DEBUG){
     cout << "-----\n";
@@ -76,9 +76,9 @@ void set_min_max (const vector<encounter>& v){
   }
 }
 
-void set_day(vector<encounter>& v){
+void set_day(vector<shared_ptr<encounter>>& v){
   for (auto&& e : v)
-    e.set_day();
+    e->set_day();
 }
 
 

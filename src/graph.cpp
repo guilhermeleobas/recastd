@@ -5,30 +5,31 @@
 #include <queue>
 #include <iostream>
 
-graph::graph(){ }
+graph::graph() {}
 
-graph::graph(const unsigned person){
+graph::graph(const unsigned person) {
   // g[person] = unordered_set<encounter, encounter::hash>();
   this->person = person;
 }
 
-
-void graph::add_edge (const encounter& enc1){
+void graph::add_edge(const weak_ptr<encounter>& enc1) {
   if (DEBUG)
-    cout << "[Graph: " << person << "] Adding:\t" << enc1 << endl;
+    cout << "[Graph: " << person << "] Adding:\t" << *(enc1.lock()) << endl;
 
   g.insert(enc1);
 }
 
-void graph::add_edge (const reference_wrapper<const encounter>& enc0, const reference_wrapper<const encounter>& enc1, const reference_wrapper<const encounter>& enc2){
+void graph::add_edge(const weak_ptr<encounter>& enc0,
+                     const weak_ptr<encounter>& enc1,
+                     const weak_ptr<encounter>& enc2) {
   // a -> b => enc0
   // b -> c => enc1
   // c -> a => enc2
-  if (DEBUG){
+  if (DEBUG) {
     cout << "[Graph: " << person << " clique]: " << endl;
-    cout << '\t' << enc0.get() << '\n';
-    cout << '\t' << enc1.get() << '\n';
-    cout << '\t' << enc2.get() << '\n';
+    cout << '\t' << *(enc0.lock()) << '\n';
+    cout << '\t' << *(enc1.lock()) << '\n';
+    cout << '\t' << *(enc2.lock()) << '\n';
     cout << '\n';
   }
 
@@ -37,11 +38,11 @@ void graph::add_edge (const reference_wrapper<const encounter>& enc0, const refe
   g.insert(enc2);
 }
 
-void graph::dump (ofstream& f) {
-  
-  for (const reference_wrapper<const encounter>& e : g){
-    // f << e.get() << '\n';
-    e.get().print(f, person);
+void graph::dump(ofstream& f) {
+
+  for (const weak_ptr<encounter>& e : g) {
+    // f << e << '\n';
+    e.lock()->print(f, person);
   }
   f.close();
 }

@@ -18,7 +18,7 @@ typedef uint node;
 typedef pair<node, node> edge;
 
 struct orderByTf {
-  bool operator () (const encounter& e1, const encounter& e2) const;
+  bool operator () (const weak_ptr<encounter>& e1, const weak_ptr<encounter>& e2) const;
 };
 
 /*
@@ -35,9 +35,9 @@ struct orderByTf {
  * 
  * Intervals are sorted in creasing way using "tf" as parameter (orderByTf).
 */
-class pqueue : public multiset<reference_wrapper<const encounter>, orderByTf> {
+class pqueue : public multiset<const weak_ptr<encounter>, orderByTf> {
 public:
-  vector<reference_wrapper<const encounter>> remove_unvalid_intervals (const encounter& enc);
-  vector<reference_wrapper<const encounter>> insert (const value_type& val);
+  vector<weak_ptr<encounter>> remove_unvalid_intervals (const weak_ptr<encounter>& enc);
+  vector<weak_ptr<encounter>> insert (const value_type& val);
   void print() const;
 };

@@ -10,10 +10,27 @@ delta = 4
 day_i = 5
 day_f = 6
 weight = 2
+timestep = 86400
     
 def discrete(f):
     
     d = dict()
+    
+    
+    if len(f[0]) == 5:
+    
+        min_ti = 0x3f3f3f3f
+        
+        for line in f:
+            if int(line[ti]) < min_ti:
+                min_ti = int(line[ti])
+                
+        if len(f[0]) == 5:
+            for i, x in enumerate(f):
+                di = ( int(x[ti]) - min_ti) / timestep
+                df = ( int(x[tf]) - min_ti) / timestep
+                f[i].append(str(di))
+                f[i].append(str(df))
         
     for day in range (0, 29):
         d[day] = []
