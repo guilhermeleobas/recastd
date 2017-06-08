@@ -11,18 +11,18 @@ using std::endl;
 using std::vector;
 using std::set_intersection;
 
-bool orderByTf::operator()(const weak_ptr<encounter> &e1, const weak_ptr<encounter> &e2) const{
-  return e1.lock()->get_tf() < e2.lock()->get_tf();
+bool orderByTf::operator()(const encounter &e1, const encounter &e2) const{
+  return e1.get_tf() < e2.get_tf();
 }
 
-vector<weak_ptr<encounter>> pqueue::remove_unvalid_intervals (const weak_ptr<encounter>& e1){
-  vector<weak_ptr<encounter>> v;
+vector<reference_wrapper<const encounter>> pqueue::remove_unvalid_intervals (const encounter& e1){
+  vector<reference_wrapper<const encounter>> v;
   while (not this->empty()){
-    const weak_ptr<encounter>& topo = *(this->begin());
+    const reference_wrapper<const encounter>& topo = *(this->begin());
 
-    if (topo.lock()->get_tf() < e1.lock()->get_ti()){
+    if (topo.get().get_tf() < e1.get_ti()){
       if (DEBUG)
-        cout << "\t[Pqueue] removeu: " << *(topo.lock()) << endl;
+        cout << "\t[Pqueue] removeu: " << topo << endl;
 
       v.push_back (topo);
 
@@ -35,17 +35,17 @@ vector<weak_ptr<encounter>> pqueue::remove_unvalid_intervals (const weak_ptr<enc
   return v;
 }
 
-vector<weak_ptr<encounter>> pqueue::insert (const pqueue::value_type& e1){
+vector<reference_wrapper<const encounter>> pqueue::insert (const pqueue::value_type& e1){
   if (DEBUG)
-    cout << "\t[Pqueue] adicionando: " << *(e1.lock()) << endl;
+    cout << "\t[Pqueue] adicionando: " << e1 << endl;
 
-  vector<weak_ptr<encounter>> v = this->remove_unvalid_intervals(e1);
+  vector<reference_wrapper<const encounter>> v = this->remove_unvalid_intervals(e1);
   multiset::insert(e1);
   return v;
 }
 
 void pqueue::print() const {
   for (auto&& it : *this){
-    cout << *(it.lock()) << '\n';
+    cout << it << '\n';
   }
 }

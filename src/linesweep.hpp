@@ -22,15 +22,15 @@ typedef pair<node, node> edge;
 class line_sweep {
 private:
   map<node, set<node>> node_map;
-  map<edge, const weak_ptr<encounter>> encounter_map;
+  map<edge, reference_wrapper<const encounter>> encounter_map;
   pqueue pq;
 public:
   line_sweep();
-  const weak_ptr<encounter> get_encounter (const node a, const node b);
+  const reference_wrapper<const encounter> get_encounter (const node a, const node b);
   vector<node> node_intersection(const node a, const node b);
-  void add_encounter(const weak_ptr<encounter>& enc1);
-  void delete_encounter(const weak_ptr<encounter>& enc1);
-  const weak_ptr<encounter> get_encounter (const pair<node, node>& e);
+  void add_encounter(const encounter& enc1);
+  void delete_encounter(const reference_wrapper<const encounter>& enc1);
+  reference_wrapper<const encounter> get_encounter (const pair<node, node>& e);
   set<node> get_nodes (const node& node);
 
   const pqueue get_pqueue() const;

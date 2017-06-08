@@ -44,7 +44,7 @@ vector<node> line_sweep::node_intersection(const node a, const node b){
 //   return ret;
 // }
 
-const weak_ptr<encounter> line_sweep::get_encounter (const node a, const node b){
+const reference_wrapper<const encounter> line_sweep::get_encounter (const node a, const node b){
   if (encounter_map.find(make_pair(a, b)) != encounter_map.end())
     return encounter_map.at(make_pair(a, b));
 
@@ -52,16 +52,16 @@ const weak_ptr<encounter> line_sweep::get_encounter (const node a, const node b)
   exit(1);
 }
 
-void line_sweep::add_encounter(const weak_ptr<encounter>& enc1){
+void line_sweep::add_encounter(const encounter& enc1){
   if (DEBUG)
-    cout << "[Line_sweep] adding: " << *(enc1.lock())<< endl;
+    cout << "[Line_sweep] adding: " << enc1 << endl;
   
-  vector<weak_ptr<encounter>> v = pq.insert(enc1);
+  vector<reference_wrapper<const encounter>> v = pq.insert(enc1);
 
-  for (const weak_ptr<encounter>& e : v)
+  for (const reference_wrapper<const encounter>& e : v)
     delete_encounter(e);
 
-  node s = enc1.lock()->get_s(), t = enc1.lock()->get_t();
+  node s = enc1.get_s(), t = enc1.get_t();
   const edge st = make_pair (s, t);
   const edge ts = make_pair (t, s);
 
@@ -73,18 +73,11 @@ void line_sweep::add_encounter(const weak_ptr<encounter>& enc1){
 }
 
 
-void line_sweep::delete_encounter(const weak_ptr<encounter>& enc1){
-  auto senc1 = enc1.lock();
-  node s = senc1->get_s(), t = senc1->get_t();
+void line_sweep::delete_encounter(const reference_wrapper<const encounter>& enc1){
+  node s = enc1.get().get_s(), t = enc1.get().get_t();
   node_map[s].erase(t);
   node_map[t].erase(s);
-  
 
-  if (encounter_map.find(make_pair(s, t)) == encounter_map.end()){
-    auto e = encounter_map.find(make_pair(s, t));
-    cout << "[Checando] " << s << ' ' << t << " -- " << *(e->second.lock()) << endl;
-  }
-  
   assert (encounter_map.find(make_pair(s, t)) != encounter_map.end());
   assert (encounter_map.find(make_pair(t, s)) != encounter_map.end());
 
@@ -96,7 +89,7 @@ void line_sweep::delete_encounter(const weak_ptr<encounter>& enc1){
 
 }
 
-const weak_ptr<encounter> line_sweep::get_encounter(const pair<node, node>& e){
+reference_wrapper<const encounter> line_sweep::get_encounter(const pair<node, node>& e){
   return encounter_map.at(e);
 }
 

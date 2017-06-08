@@ -35,6 +35,7 @@ bazel*
 ego_graphs
 recast_class
 recastd_class
+python/images/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

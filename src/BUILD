@@ -45,7 +45,7 @@ cc_library(
 cc_library (
   name = "graph",
   srcs = ["graph.cpp"],
-  hdrs = ["graph.hpp", "debug.hpp"],
+  hdrs = ["graph.hpp", "debug.hpp", "methods.hpp"],
   deps = [
     ":encounter",
   ],

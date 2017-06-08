@@ -13,12 +13,12 @@ encounter::encounter(){}
 
 encounter::encounter(uint s, uint t, uint tf, uint ti, uint delta) 
   : s(s), t(t), tf(tf), ti(ti), delta(delta), 
-    day(0), min_day(0), max_day(0x3f3f3f3f)
+    day(0), min_day(0), max_day(0x3f3f3f3f), index(-1)
   {}
 
 encounter::encounter(uint s, uint t, uint tf, uint ti, uint delta, uint day_i, uint day_f) 
   : s(s), t(t), tf(tf), ti(ti), delta(delta), 
-    day(0), min_day(day_i), max_day(day_f)
+    day(0), min_day(day_i), max_day(day_f), index(-1)
   {}
   
 uint encounter::get_day() const{
@@ -76,6 +76,14 @@ uint encounter::get_s() const{
 
 uint encounter::get_t() const{
   return this->t;
+}
+
+uint encounter::get_index() const {
+  return this->index;
+}
+
+void encounter::set_index(const uint index) {
+  this->index = index;
 }
 
 

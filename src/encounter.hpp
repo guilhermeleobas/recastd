@@ -22,6 +22,7 @@ class encounter {
  private:
   uint s, t, tf, ti, delta, day;
   uint min_day, max_day;
+  uint index;
 
  public:
   encounter();
@@ -43,6 +44,9 @@ class encounter {
 
   void set_ti(uint);
   void set_tf(uint);
+
+  uint get_index() const;
+  void set_index(uint);
 
   uint get_delta() const;
   void set_delta();
