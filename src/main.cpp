@@ -9,6 +9,8 @@
 #include <unordered_set>
 #include <memory>
 #include <sys/stat.h>
+#include <string>
+#include <algorithm>
 
 using namespace std;
 
@@ -16,7 +18,7 @@ typedef unsigned uint;
 
 string filename = "out/";
 string input_filename;
-bool share_graph = false;
+string share_graph = "node";
 
 vector<encounter> read_encounters() {
   vector<encounter> v;
@@ -30,28 +32,64 @@ vector<encounter> read_encounters() {
   while (true) {
     uint s, t, tf, ti, delta;
     f >> s >> t >> tf >> ti >> delta;
+    if (not f) break;
     if (DEBUG)
       cout << "read: " << s << ' ' << t << ' ' << tf << ' ' << ti << ' '
            << delta << '\n';
-    if (not f) break;
 
     if (s > t) swap(s, t);
 
+    min_ti = min(min_ti, ti);
+    min_tf = min(min_tf, tf);
     v.push_back(encounter(s, t, tf, ti, delta));
   }
 
+  cout << "[INFO] min_ti: " << min_ti << '\n';
+  cout << "[INFO] min_tf: " << min_tf << '\n';
+
   return v;
+}
+
+map<node, graph> build_graphs_share_neighbors(const vector<encounter> &v){
+  map<node, graph> mapa;
+
+  bool share_graph = false; // share_neighbors
+
+  for (int i=0; i<v.size(); i++){
+   const encounter e = v[i];
+    node a = e.get_s(), b = e.get_t();
+
+    if (i % 10000 == 0)
+      cout << "len: " << i << '/' << v.size() << '\n';
+
+    if (DEBUG) {
+      cout << "nodes: " << a << ' ' << b << '\n';
+    }
+
+    if (mapa.find(a) == mapa.end()) mapa[a] = graph(a, max_days, max_nodes);
+    if (mapa.find(b) == mapa.end()) mapa[b] = graph(b, max_days, max_nodes);
+
+    mapa[a].add_encounter(e);
+    mapa[b].add_encounter(e);
+
+    merge_graphs(mapa[a], mapa[b], share_graph);
+  }
+
+  return mapa;
 }
 
 map<node, graph> build_graphs_share_graph(const vector<encounter> &v) {
   map<node, graph> mapa;
   line_sweep ls;
 
+  bool share_graph = true;
+
   for (int i=0; i<v.size(); i++) {
     const encounter e = v[i];
     node a = e.get_s(), b = e.get_t();
 
-    cout << "len: " << i << '/' << v.size() << '\n';
+    if (i % 10000 == 0)
+      cout << "len: " << i << '/' << v.size() << '\n';
 
     if (DEBUG) {
       cout << "nodes: " << a << ' ' << b << '\n';
@@ -64,10 +102,10 @@ map<node, graph> build_graphs_share_graph(const vector<encounter> &v) {
 
     // vector<node> nodes = ls.node_intersection(a, b);
 
-    graph g = merge_graphs(mapa[a], mapa[b]);
-    g.add_encounter(e);
-    mapa[a] = g;
-    mapa[b] = g;
+    mapa[a].add_encounter(e);
+    mapa[b].add_encounter(e);
+
+    merge_graphs(mapa[a], mapa[b], share_graph);
 
     // if (nodes.empty()) {
     //   graph g = merge_graphs(mapa[a], mapa[b]);
@@ -136,12 +174,23 @@ bool parse_arguments(int argc, char *argv[]) {
       cout << "[INFO] Setting timestep to: " << timestep << '\n';
     } else if (arg == "-o" || arg == "--output" || arg == "-out") {
       filename = string(argv[i + 1]);
-      cout << "[INFO] Setting filename to: " << filename << '\n';
+      cout << "[INFO] Setting output folder to: " << filename << '\n';
     } else if (arg == "-in" || arg == "--input") {
       input_filename = string(argv[i + 1]);
       cout << "[INFO] Setting input filename to: " << input_filename << '\n';
-    } else if (arg == "-gs" || arg == "--graph_sharing") {
-      share_graph = true;
+    } else if (arg == "-st" || arg == "--share_type") {
+      string s = argv[i+1];
+      std::transform(begin(s), end(s), begin(s), ::tolower);
+      if (s == "node")
+        share_graph = "node";
+      else if (s == "graph")
+        share_graph = "graph";
+      else if (s == "neighbors")
+        share_graph = "neighbors";
+      else {
+        cerr << "Cannot match s in share_type\n";
+        exit(1);
+      }
       cout << "[INFO] Setting share mode to \"graph sharing\"\n";
     }
   }
@@ -151,7 +200,7 @@ bool parse_arguments(int argc, char *argv[]) {
   cout << "[INFO] Timestep: " << timestep << '\n';
   cout << "[INFO] Input: " << input_filename << '\n';
   cout << "[INFO] Output: " << filename << '\n';
-  cout << "[INFO] Sharing: " << (share_graph ? "True" : "False") << '\n';
+  cout << "[INFO] Sharing: " << share_graph  << '\n';
 
   return true;
 }
@@ -173,9 +222,8 @@ int main(int argc, char *argv[]) {
     cerr << "-t, --timestep\t\tSpecify a timestep. Default value is 86400.\n";
     cerr << "-out, --output\t\tSpecify a folder name to output files. Default "
             "value is '/out' created in the root of your project\n";
-    cerr << "-gs, --graph_sharing True\t\tNodes will share their ego_graph. "
-            "Default "
-            "value is False\n";
+    cerr << "-st, --share_type {node, neighbors, graph}\t\t How the sharing is made. "
+            "Default value is node\n";
 
     exit(1);
   }
@@ -195,13 +243,16 @@ int main(int argc, char *argv[]) {
   vector<encounter> v = read_encounters();
   set_properties(v);
 
-  // map<node, graph> mapa;
-  // if (share_graph)
-  //   mapa = build_graphs_share_graph(v);
-  // else
-  map<node, graph> mapa = build_graphs_share_graph(v);
-
-  cout << mapa.size() << '\n';
+  map<node, graph> mapa;
+  if (share_graph == "graph"){
+    mapa = build_graphs_share_graph(v);
+  }
+  else if (share_graph == "neighbors"){
+    mapa = build_graphs_share_neighbors(v); 
+  }
+  else{
+    mapa = build_graphs_share_node(v);
+  }
 
   for (auto &&it : mapa) {
     if (DEBUG) cout << "dumping: " << it.first << endl;

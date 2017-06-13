@@ -9,6 +9,9 @@
 
 #include "encounter.hpp"
 
+#include "roaring.hh"
+// #include "roaring.c"
+
 using std::vector;
 using std::map;
 using std::unordered_set;
@@ -16,6 +19,8 @@ using std::unordered_set;
 typedef unsigned int uint;
 typedef uint node;
 typedef pair<uint, uint> edge;
+
+#define MAX_DAYS 28
 
 class graph {
  private:
@@ -28,14 +33,22 @@ class graph {
   // typedef set<int> muset;
   // muset g;
   
-  typedef vector<boost::dynamic_bitset<>> tgraph;
+  // typedef vector<vector<bitset<28>>> tgraph;
+  typedef vector<Roaring> tgraph;
 
   node person;
   tgraph gg;
 
+  node latest;
+
  public:
   graph();
   graph(const uint person, const uint max_days, const uint max_nodes);
+  
+  node get_latest() const;
+  node get_person() const;
+  void set_person (const node);
+  void set_latest(const node n);
 
   void add_encounter(const encounter&);
   void add_encounter(const encounter&, const encounter&, const encounter&);
@@ -65,5 +78,5 @@ class graph {
 
 };
 
-graph merge_graphs (const graph&, const graph&);
-graph merge_graphs (const graph&, const graph&, const graph&);
+void merge_graphs (graph&, graph&, bool share_graph);
+// graph merge_graphs (const graph&, const graph&, const graph&);

@@ -20,9 +20,8 @@ extern uint min_ti;
 
 class encounter {
  private:
-  uint s, t, tf, ti, delta, day;
+  uint s, t, tf, ti, delta;
   uint min_day, max_day;
-  uint index;
 
  public:
   encounter();
@@ -33,9 +32,10 @@ class encounter {
   encounter(uint s, uint t, uint tf, uint ti, uint delta, uint day_i,
             uint day_f);
 
-  void set_day();
-  uint get_day() const;
+  void calc_day();
 
+  void set_min_day(uint);
+  void set_max_day(uint);
   uint get_min_day() const;
   uint get_max_day() const;
 
@@ -45,11 +45,8 @@ class encounter {
   void set_ti(uint);
   void set_tf(uint);
 
-  uint get_index() const;
-  void set_index(uint);
-
   uint get_delta() const;
-  void set_delta();
+  void calc_delta();
 
   uint get_s() const;
   uint get_t() const;
@@ -94,7 +91,3 @@ class encounter {
 
 bool can_merge(const encounter& e1, const encounter& e2);
 encounter merge(const encounter& e1, const encounter& e2);
-
-bool can_merge(const weak_ptr<encounter>& e1, const weak_ptr<encounter>& e2);
-shared_ptr<encounter> merge(const weak_ptr<encounter>& e1,
-                            const weak_ptr<encounter>& e2);

@@ -13,27 +13,30 @@ encounter::encounter(){}
 
 encounter::encounter(uint s, uint t, uint tf, uint ti, uint delta) 
   : s(s), t(t), tf(tf), ti(ti), delta(delta), 
-    day(0), min_day(0), max_day(0x3f3f3f3f), index(-1)
+    min_day(0), max_day(0x3f3f3f3f)
   {}
 
 encounter::encounter(uint s, uint t, uint tf, uint ti, uint delta, uint day_i, uint day_f) 
   : s(s), t(t), tf(tf), ti(ti), delta(delta), 
-    day(0), min_day(day_i), max_day(day_f), index(-1)
+    min_day(day_i), max_day(day_f)
   {}
   
-uint encounter::get_day() const{
-  return this->day;
-}
-
-void encounter::set_day(){
+void encounter::calc_day(){
   // [min_ti, timestep] are both global variables exposed as extern in encounter.hpp
   // in the original paper, for some reason the day is calculated using tf, for instance:
   // day = (tf - min_tf) / timestep
   
-  min_day = ceil ( (ti - min_ti) / timestep );
-  max_day = ceil ( (tf - min_ti) / timestep );
-  day = min_day;
+  this->min_day = ceil ( (ti - min_ti) / timestep );
+  this->max_day = ceil ( (tf - min_ti) / timestep );
+}
 
+
+void encounter::set_min_day(uint min_day){
+  this->min_day = min_day;
+}
+
+void encounter::set_max_day(uint max_day){
+  this->max_day = max_day;
 }
 
 uint encounter::get_min_day() const{
@@ -65,7 +68,7 @@ uint encounter::get_delta() const{
   return this->delta;
 }
 
-void encounter::set_delta() {
+void encounter::calc_delta() {
   delta = tf - ti;
 }
 
@@ -77,15 +80,6 @@ uint encounter::get_s() const{
 uint encounter::get_t() const{
   return this->t;
 }
-
-uint encounter::get_index() const {
-  return this->index;
-}
-
-void encounter::set_index(const uint index) {
-  this->index = index;
-}
-
 
 edge encounter::get_edge() const {
   return make_pair(this->s, this->t);
@@ -126,34 +120,20 @@ std::ostream& operator<< (std::ostream &out, const encounter &e){
   return out;
 }
 
-bool can_merge (const weak_ptr<encounter>& e1, const weak_ptr<encounter>& e2){
-  auto se1 = e1.lock(), se2 = e2.lock();
-  return (
-      se1->get_s() == se2->get_s() and
-      se1->get_t() == se2->get_t() and
-      se1->get_tf() == se2->get_ti()
-      );
-}
-
-shared_ptr<encounter> merge (const weak_ptr<encounter>& e1, const weak_ptr<encounter>& e2){
-  auto se1 = e1.lock(), se2 = e2.lock();
-  auto novo = se1;
-  novo->set_tf(se2->get_tf());
-  novo->set_delta();
-  return novo;
-}
-
 bool can_merge (const encounter& e1, const encounter& e2){
   return (
     e1.get_s() == e2.get_s() and
     e1.get_t() == e2.get_t() and
-    e1.get_tf() == e2.get_ti()
+    (e2.get_ti() - e1.get_tf() <= 1)
   );
 }
 
 encounter merge (const encounter& e1, const encounter& e2){
   encounter novo = e1;
   novo.set_tf(e2.get_tf());
-  novo.set_delta();
+  novo.calc_delta();
+  novo.calc_day();
+  novo.set_min_day(min(e1.get_min_day(), e2.get_min_day()));
+  novo.set_max_day(max(e1.get_max_day(), e2.get_max_day()));
   return novo;
 }

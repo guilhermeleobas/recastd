@@ -6,25 +6,43 @@
 #include <iostream>
 #include "methods.hpp"
 
+#include "roaring.c"
+
+inline int calc_node(const int pos) { return pos / max_nodes; }
+
+inline int calc_day(const int pos) { return pos % max_nodes; }
+
 graph::graph() {}
 
 graph::graph(const uint person, const uint max_days, const uint max_nodes) {
   // g[person] = unordered_set<encounter, encounter::hash>();
   this->person = person;
-  gg = vector<boost::dynamic_bitset<>>(max_nodes + 1,
-                                       boost::dynamic_bitset<>(max_days + 1));
+  gg = vector<Roaring>(max_nodes + 1);
+  for (auto &&r : gg) {
+    r.setCopyOnWrite(true);
+  }
+
+  latest = 0;
 }
 
+void graph::set_person(const node person) { this->person = person; }
+
 void graph::add_encounter(const encounter &e) {
-  if (DEBUG) cout << "[Graph: " << person << "] Adding:\t" << e << endl;
+  if (DEBUG) cout << "[Graph: " << person << "] Adding: " << e << endl;
 
   for (uint day = e.get_min_day(); day <= e.get_max_day(); day++) {
-    node n = (e.get_s() != person) ? e.get_s() : e.get_t();
-    gg[n][day] = 1;
-    if (DEBUG)
-      cout << "[Graph: " << person << "] Set:\t" << gg[n][day] << '\t' << e
-           << endl;
+
+    node n = (e.get_s() == person) ? e.get_t() : e.get_s();
+    gg[person].add(max_nodes * n + day);
+    gg[n].add(max_nodes*person + day);
+
+    if (DEBUG) {
+      cout << "\t[Row: " << person << "] Set: " << max_nodes *n + day << ' '
+           << " node: " << n << " day: " << day << '\n';
+    }
   }
+
+  if (DEBUG) cout << '\n';
 }
 
 void graph::add_encounter(const encounter &e0, const encounter &e1,
@@ -46,50 +64,73 @@ void graph::add_encounter(const encounter &e0, const encounter &e1,
 }
 
 void graph::dump(ofstream &f) {
-
+  vector<int> v;
   for (uint i = 0; i < max_nodes; i++) {
-    if (!gg[i].any()) continue;
+    if (gg[i].cardinality() == 0) continue;
 
-    int day = -1;
-    for (uint j = 1; j < max_days; j++) {
+    vector<encounter> v;
+    
+    for (auto bs : gg[i]){
+      int s = i;
+      int t = calc_node(bs);
+      int day_i = calc_day(bs);
+      int day_f = day_i;
+      int tf = timestep * (day_f + 1) - 1;
+      int ti = timestep * day_i;
+      int delta = tf - ti;
 
-      if (day == -1 && gg[i][j]) day = j;
-
-      if ((!gg[i][j] && day != -1)or(day != -1 and j == max_days - 1)) {
-        f << person << ' ' << i << ' ' << (timestep * (j)) - 1 << ' '
-          << (timestep * day) << ' ' << timestep - 1 << ' ' << day << ' '
-          << j - 1 << '\n';
-        day = -1;
-      }
-
-      // if (gg[i][j])
-      //   f << person << ' ' << p2 << ' ' << (timestep * (day + 1)) - 1 << ' '
-      //     << (timestep * day) << ' ' << timestep - 1 << ' ' << day << ' ' <<
-      // day
-      //     << '\n';
+      v.push_back(encounter(s, t, tf, ti, delta, day_i, day_f));
     }
-  }
 
-  // for (const uint& n : gg) {
-  //   // f << e << '\n';
-  //   v[n].print(f, person);
-  // }
-  // f.close();
+    merge_encounters(v);
+
+    for (const encounter &e : v)
+      f << e << '\n';
+  }
 }
 
-graph merge_graphs(const graph &g1, const graph &g2) {
-  graph g = g1;
-  for (int i = 0; i < max_days; i++) {
-    g[i] |= g2[i];
+node graph::get_latest() const { return this->latest; }
+
+node graph::get_person() const { return this->person; }
+
+void graph::set_latest(const node n) { this->latest = n; }
+
+void merge_graphs(graph &g1, graph &g2, bool share_graph) {
+  if (g1.get_latest() == g2.get_person() &&
+      g2.get_latest() == g1.get_person()) {
+    // cout << "chegou aqui\n";
+    return;
   }
-  return g;
+
+  node pa = g1.get_person();
+  node pb = g2.get_person();
+  
+
+
+  if (share_graph){
+    for (uint i = 0; i < max_nodes; i++) {
+      g1[i] |= g2[i];
+    }
+    g2 = g1;
+
+    g2.set_person(pb);
+  }
+  else{
+    // share neighbors
+    g1[g2.get_person()] |= g2[g2.get_person()];
+    g2[g1.get_person()] |= g1[g1.get_person()];
+  }
+
+
+  g1.set_latest(pb);
+  g2.set_latest(pa);
 }
 
-graph merge_graphs(const graph &g1, const graph &g2, const graph &g3) {
-  graph g = g1;
-  for (int i = 0; i < max_days; i++) {
-    g[i] |= g2[i];
-    g[i] |= g3[i];
-  }
-  return g;
-}
+// graph merge_graphs(const graph &g1, const graph &g2, const graph &g3) {
+//   graph g = g1;
+//   for (uint i = 0; i < max_nodes; i++) {
+//     g[i] |= g2[i];
+//     g[i] |= g3[i];
+//   }
+//   return g;
+// }

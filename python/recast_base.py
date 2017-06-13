@@ -6,18 +6,19 @@ import os
 import networkx as nx
 import numpy as np
 
-import matplotlib.pyplot as plt
-import matplotlib
-from matplotlib import rcParams
-rcParams.update({'figure.autolayout': True})
-from matplotlib import rc
-rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-# matplotlib.rc('font', family='Arial')
-## for Palatino and other serif fonts use:
-# rc('font',**{'family':'serif','serif':['Palatino']})
-rc('text', usetex=True)
+import platform
 
-import pandas as pd
+if platform.python_implementation() == 'CPython':
+    import matplotlib.pyplot as plt
+    import matplotlib
+    from matplotlib import rcParams
+    rcParams.update({'figure.autolayout': True})
+    from matplotlib import rc
+    rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+    # matplotlib.rc('font', family='Arial')
+    ## for Palatino and other serif fonts use:
+    # rc('font',**{'family':'serif','serif':['Palatino']})
+    rc('text', usetex=True)
 
 import gen_graphs as gg
 import classifier

@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     # python src/gen_graphs.py filename
     if (len(sys.argv) < 2):
-        s = 'python src/recast_edgelist.py trace'
+        s = 'python recast_edgelist.py trace_folder'
         sys.exit (s)
 
     #############################################
@@ -34,17 +34,17 @@ if __name__ == '__main__':
         os.makedirs(im_folder_classifier)
     if not os.path.exists(out_folder):
         os.makedirs(out_folder)
+        
+    files = os.listdir(in_folder)
 
-    # folder = 'recast_class' + os.sep + trace_name
-    # folder_images = 'images' + os.sep + 'recast' + os.sep + trace_name + os.sep
-
-    for f in os.listdir(in_folder):
+    for i, f in enumerate(files):
+        print ("#file: {}/{}".format(i, len(files)))
         filename = os.path.join(in_folder, f)
         node_id = os.path.split(filename)[1].split('.')[0]
         sys.argv = [python_file, filename]
 
         gg.main()
-
+        
         ep = get_ep(gg)
         random_ep = get_random_ep(gg)
         to = get_to(gg)
@@ -60,55 +60,3 @@ if __name__ == '__main__':
         save_edges (gg, ep, random_ep, to, random_to, p_rnd,
                     fname=out_folder + os.sep + node_id + '_', ext='.txt',
                     recastd=True)
-
-#     #############################################
-
-#         plot_ep(ep, random_ep, fname=folder_images + os.sep + 'ep.png')
-#         plot_to(to, random_to, fname=folder_images + os.sep + 'to.png')
-#         plot_relations(p_rnd, friends, bridges, acquaintance, random, fname=folder_images + os.sep + 'rel.png')
-
-#         save_edges(gg, ep, random_ep, to, random_to, p_rnd, fname= folder + os.sep, ext='.txt')
-
-
-# if __name__ == '__main__':
-    
-
-#     folder = in_folder
-
-#     for f in os.listdir(folder):
-
-#         filename = sys.argv[1]
-#         path = os.path.split(filename)[0]
-#         trace_name = os.path.split(filename)[1].split('.')[0]
-
-#         sys.argv = [python_file, trace]
-        
-#         recast.main()
-#         edge_persistence(figs_ep + os.sep + trace_name + '.png', save=False)
-#         topological_overlap(figs_to + os.sep + trace_name + '.png', save=False)
-#         save_edges(fname=out_folder + os.sep + trace_name, ext='.txt')
-#         classify_results(figs_classifier + os.sep + trace_name + '.png', save=False)
-
-
-#         plot_ep(ep, random_ep, fname=folder_images + os.sep + 'ep.png')
-#         plot_to(to, random_to, fname=folder_images + os.sep + 'to.png')
-#         plot_relations(friends, bridges, acquaintance, random, fname=folder_images + os.sep + 'rel.png')
-
-#         save_edges(gg, random_ep, random_to, p_rnd, fname= folder + os.sep, ext='.txt')
-
-
-
-
-
-# python_file = 'recast.py'
-
-# trace = sys.argv[1]
-
-
-
-
-
-
-    
-    
-

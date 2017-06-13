@@ -45,10 +45,21 @@ cc_library(
 cc_library (
   name = "graph",
   srcs = ["graph.cpp"],
-  hdrs = ["graph.hpp", "debug.hpp", "methods.hpp"],
+  hdrs = ["roaring.h", "roaring.hh", "roaring.c", "graph.hpp", "debug.hpp", "methods.hpp"],
   deps = [
     ":encounter",
   ],
+  copts = ["-march=native", "-O3", "-std=c++14"],
+)
+
+cc_binary(
+  name = "filter",
+  srcs = ["filter.cpp"],
+  deps = [
+    ":encounter",
+    ":methods",
+  ],
+  copts = ["-march=native", "-std=c++14", "-Wall", "-Wextra", "-O2"]
 )
 
 cc_binary(
@@ -61,5 +72,5 @@ cc_binary(
     ":encounter",
     ":methods",
   ],
-  copts = ["-std=c++14", "-Wall", "-Wextra", "-O2"]
+  copts = ["-march=native", "-std=c++14", "-Wall", "-Wextra", "-O2"]
 )

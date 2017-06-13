@@ -13,7 +13,7 @@ if __name__ == '__main__':
 
     # python src/gen_graphs.py filename
     if (len(sys.argv) < 2):
-        s = 'python src/recast_edgelist.py trace'
+        s = 'python recast_edgelist.py trace'
         sys.exit (s)
 
     filename = sys.argv[1]

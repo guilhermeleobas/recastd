@@ -40,6 +40,10 @@ def discrete(f):
             if day >= int(i[day_i]) and day <= int(i[day_f]):
                 d[day].append(i)
     
+    for k in d.keys():
+        if len(d[k]) == 0:
+            d.pop(k)
+
     return d
 
 def combine_graphs (graphs):
