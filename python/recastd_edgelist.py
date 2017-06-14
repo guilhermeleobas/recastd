@@ -36,9 +36,22 @@ if __name__ == '__main__':
         os.makedirs(out_folder)
         
     files = os.listdir(in_folder)
-
+    
+    out_files = map (lambda x: x.strip('.txt').split('_')[0], os.listdir(out_folder))
+    d = dict()
+    for i in out_files:
+        if i not in d:
+            d[i] = 1;
+        else:
+            d[i] += 1
+            
     for i, f in enumerate(files):
-        print ("#file: {}/{}".format(i, len(files)))
+        print ("#file {} : {}/{}".format(f, i, len(files)))
+        node_id = f.split('.txt')[0]
+        if (node_id in d and d[node_id] == 4):
+            print 'skipping', node_id
+            continue
+        
         filename = os.path.join(in_folder, f)
         node_id = os.path.split(filename)[1].split('.')[0]
         sys.argv = [python_file, filename]

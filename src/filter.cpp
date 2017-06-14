@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
   set_properties(v);
 
   for (const encounter &e : v){
-    if (e.get_min_day() > 28) continue;
+    if (e.get_max_day() > 28) continue;
     
     cout << e.get_s() << ' ' << e.get_t() << ' ' << e.get_tf() << ' ' << e.get_ti() << ' ' << e.get_delta() << '\n';
   }

@@ -253,6 +253,8 @@ int main(int argc, char *argv[]) {
   else{
     mapa = build_graphs_share_node(v);
   }
+  
+  cout << mapa.size() << endl;
 
   for (auto &&it : mapa) {
     if (DEBUG) cout << "dumping: " << it.first << endl;
