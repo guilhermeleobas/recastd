@@ -44,7 +44,7 @@ vector<node> line_sweep::node_intersection(const node a, const node b){
 //   return ret;
 // }
 
-const reference_wrapper<const encounter> line_sweep::get_encounter (const node a, const node b){
+const encounter line_sweep::get_encounter (const node a, const node b){
   if (encounter_map.find(make_pair(a, b)) != encounter_map.end())
     return encounter_map.at(make_pair(a, b));
 
@@ -56,9 +56,9 @@ void line_sweep::add_encounter(const encounter& enc1){
   if (DEBUG)
     cout << "[Line_sweep] adding: " << enc1 << endl;
   
-  vector<reference_wrapper<const encounter>> v = pq.insert(enc1);
+  vector<encounter> v = pq.insert(enc1);
 
-  for (const reference_wrapper<const encounter>& e : v)
+  for (const encounter& e : v)
     delete_encounter(e);
 
   node s = enc1.get_s(), t = enc1.get_t();
@@ -73,8 +73,11 @@ void line_sweep::add_encounter(const encounter& enc1){
 }
 
 
-void line_sweep::delete_encounter(const reference_wrapper<const encounter>& enc1){
-  node s = enc1.get().get_s(), t = enc1.get().get_t();
+void line_sweep::delete_encounter(const encounter& enc1){
+  if (DEBUG){
+    cout << "[DELETANDO]: " << enc1 << '\n';
+  }
+  node s = enc1.get_s(), t = enc1.get_t();
   node_map[s].erase(t);
   node_map[t].erase(s);
 
@@ -89,7 +92,7 @@ void line_sweep::delete_encounter(const reference_wrapper<const encounter>& enc1
 
 }
 
-reference_wrapper<const encounter> line_sweep::get_encounter(const pair<node, node>& e){
+const encounter line_sweep::get_encounter(const pair<node, node>& e){
   return encounter_map.at(e);
 }
 

@@ -95,7 +95,7 @@ node graph::get_person() const { return this->person; }
 
 void graph::set_latest(const node n) { this->latest = n; }
 
-void merge_graphs(graph &g1, graph &g2, bool share_graph) {
+void merge_graphs(graph &g1, graph &g2, bool share_graph, ofstream &f) {
   if (g1.get_latest() == g2.get_person() &&
       g2.get_latest() == g1.get_person()) {
     // cout << "chegou aqui\n";
@@ -104,19 +104,22 @@ void merge_graphs(graph &g1, graph &g2, bool share_graph) {
 
   node pa = g1.get_person();
   node pb = g2.get_person();
-  
-
 
   if (share_graph){
+    uint64_t len_g1 = 0, len_g2 = 0;
+    
     for (uint i = 0; i < max_nodes; i++) {
+      len_g1 += g1[i].cardinality();
+      len_g2 += g2[i].cardinality();
       g1[i] |= g2[i];
     }
     g2 = g1;
-
+    f << len_g1 << '\n' << len_g2 << '\n';
     g2.set_person(pb);
   }
   else{
     // share neighbors
+    f << g2[g2.get_person()].cardinality() << ' ' << g1[g1.get_person()].cardinality() << '\n';
     g1[g2.get_person()] |= g2[g2.get_person()];
     g2[g1.get_person()] |= g1[g1.get_person()];
   }

@@ -28,7 +28,7 @@ vector<encounter> read_encounters() {
   f.sync_with_stdio(false);
 
   f.open(input_filename, ios_base::in);
-
+  
   while (true) {
     uint s, t, tf, ti, delta;
     f >> s >> t >> tf >> ti >> delta;
@@ -53,7 +53,14 @@ vector<encounter> read_encounters() {
 map<node, graph> build_graphs_share_neighbors(const vector<encounter> &v){
   map<node, graph> mapa;
 
-  bool share_graph = false; // share_neighbors
+  bool sg = false; // share_neighbors
+  
+  ofstream f;
+  string s = "bytes_";
+  s += share_graph;
+  s += ".txt";
+  cout << s << '\n';
+  f.open(s, ios_base::out);
 
   for (int i=0; i<v.size(); i++){
    const encounter e = v[i];
@@ -72,8 +79,10 @@ map<node, graph> build_graphs_share_neighbors(const vector<encounter> &v){
     mapa[a].add_encounter(e);
     mapa[b].add_encounter(e);
 
-    merge_graphs(mapa[a], mapa[b], share_graph);
+    merge_graphs(mapa[a], mapa[b], sg, f);
   }
+  
+  f.close();
 
   return mapa;
 }
@@ -82,8 +91,14 @@ map<node, graph> build_graphs_share_graph(const vector<encounter> &v) {
   map<node, graph> mapa;
   line_sweep ls;
 
-  bool share_graph = true;
+  bool sg = true;
 
+  ofstream f;
+  string s = "bytes_";
+  s += share_graph;
+  s += ".txt";
+  f.open(s, ios_base::out);
+  
   for (int i=0; i<v.size(); i++) {
     const encounter e = v[i];
     node a = e.get_s(), b = e.get_t();
@@ -105,7 +120,7 @@ map<node, graph> build_graphs_share_graph(const vector<encounter> &v) {
     mapa[a].add_encounter(e);
     mapa[b].add_encounter(e);
 
-    merge_graphs(mapa[a], mapa[b], share_graph);
+    merge_graphs(mapa[a], mapa[b], sg, f);
 
     // if (nodes.empty()) {
     //   graph g = merge_graphs(mapa[a], mapa[b]);
@@ -123,12 +138,20 @@ map<node, graph> build_graphs_share_graph(const vector<encounter> &v) {
     // }
   }
 
+  f.close();
+  
   return mapa;
 }
 
 map<node, graph> build_graphs_share_node(const vector<encounter> &v) {
   map<node, graph> mapa;
   line_sweep ls;
+
+  ofstream f;
+  string s = "bytes_";
+  s += share_graph;
+  s += ".txt";
+  f.open(s, ios_base::out);
 
   for (const encounter &e : v) {
     node a = e.get_s(), b = e.get_t();
@@ -140,23 +163,30 @@ map<node, graph> build_graphs_share_node(const vector<encounter> &v) {
     if (mapa.find(a) == mapa.end()) mapa[a] = graph(a, max_days, max_nodes);
     if (mapa.find(b) == mapa.end()) mapa[b] = graph(b, max_days, max_nodes);
 
+    if (DEBUG)
+      cout << "comecou\n";
     ls.add_encounter(e);
+    if (DEBUG)
+      cout << "terminou\n";
 
     vector<node> nodes = ls.node_intersection(a, b);
 
     if (nodes.empty()) {
+      f << 1 << '\n' << 1 << '\n';
       mapa[a].add_encounter(e);
       mapa[b].add_encounter(e);
     }
 
     for (const node c : nodes) {
-      const reference_wrapper<const encounter> e0 = ls.get_encounter(a, b);
-      const reference_wrapper<const encounter> e1 = ls.get_encounter(a, c);
-      const reference_wrapper<const encounter> e2 = ls.get_encounter(b, c);
+      const encounter e0 = ls.get_encounter(a, b);
+      const encounter e1 = ls.get_encounter(a, c);
+      const encounter e2 = ls.get_encounter(b, c);
 
-      mapa[a].add_encounter(e0.get(), e1.get(), e2.get());
-      mapa[b].add_encounter(e0.get(), e1.get(), e2.get());
-      mapa[c].add_encounter(e0.get(), e1.get(), e2.get());
+      f << 1 << '\n' << 1 << '\n' << 1 << '\n';
+
+      mapa[a].add_encounter(e0, e1, e2);
+      mapa[b].add_encounter(e0, e1, e2);
+      mapa[c].add_encounter(e0, e1, e2);
     }
   }
 
@@ -191,7 +221,6 @@ bool parse_arguments(int argc, char *argv[]) {
         cerr << "Cannot match s in share_type\n";
         exit(1);
       }
-      cout << "[INFO] Setting share mode to \"graph sharing\"\n";
     }
   }
 
@@ -242,6 +271,7 @@ int main(int argc, char *argv[]) {
 
   vector<encounter> v = read_encounters();
   set_properties(v);
+  
 
   map<node, graph> mapa;
   if (share_graph == "graph"){

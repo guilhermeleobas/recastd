@@ -78,5 +78,5 @@ class graph {
 
 };
 
-void merge_graphs (graph&, graph&, bool share_graph);
+void merge_graphs (graph&, graph&, bool share_graph, ofstream&);
 // graph merge_graphs (const graph&, const graph&, const graph&);
