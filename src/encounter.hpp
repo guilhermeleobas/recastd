@@ -12,15 +12,16 @@ using namespace std;
 typedef unsigned int uint;
 typedef pair<uint, uint> edge;
 
-const uint DEFAULT_TIMESTEP =
+const uint64_t DEFAULT_TIMESTEP =
     60 * 60 * 24;  // 60 seconds x 60 minutes x 24 hours = 86400 seconds
-extern uint timestep;
-extern uint min_tf;
-extern uint min_ti;
+extern uint64_t timestep;
+extern uint64_t min_tf;
+extern uint64_t min_ti;
 
 class encounter {
  private:
-  uint s, t, tf, ti, delta;
+  uint s, t;
+  uint64_t tf, ti, delta;
   uint min_day, max_day;
 
  public:
@@ -28,8 +29,8 @@ class encounter {
   // ~encounter(){
   //   std::cout << "Destruindo " << *this << '\n';
   // }
-  encounter(uint s, uint t, uint tf, uint ti, uint delta);
-  encounter(uint s, uint t, uint tf, uint ti, uint delta, uint day_i,
+  encounter(uint s, uint t, uint64_t tf, uint64_t ti, uint64_t delta);
+  encounter(uint s, uint t, uint64_t f, uint64_t ti, uint64_t delta, uint day_i,
             uint day_f);
 
   void calc_day();
@@ -39,15 +40,18 @@ class encounter {
   uint get_min_day() const;
   uint get_max_day() const;
 
-  uint get_tf() const;
-  uint get_ti() const;
+  uint64_t get_tf() const;
+  uint64_t get_ti() const;
 
-  void set_ti(uint);
-  void set_tf(uint);
+  void set_ti(uint64_t);
+  void set_tf(uint64_t);
 
-  uint get_delta() const;
+  uint64_t get_delta() const;
   void calc_delta();
 
+  void set_s(const uint);
+  void set_t(const uint);
+  
   uint get_s() const;
   uint get_t() const;
 
@@ -90,4 +94,5 @@ class encounter {
 };
 
 bool can_merge(const encounter& e1, const encounter& e2);
+bool can_merge_no_restriction(const encounter& e1, const encounter& e2);
 encounter merge(const encounter& e1, const encounter& e2);

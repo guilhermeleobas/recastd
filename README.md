@@ -1,5 +1,7 @@
 # recastd
 
+RECASTD uses roah (for arg parsing) and roaring (for bitmap compression)
+
 to compile and run (with debug)
 bazel build -copt="-DDEBUG" src:recast && ./bazel-bind/src/recast
 

@@ -5,18 +5,18 @@
 #include <cmath>
 
 // definition of timestep;
-uint timestep = DEFAULT_TIMESTEP;
-uint min_tf = 0x3f3f3f3f;
-uint min_ti = 0x3f3f3f3f;
+uint64_t timestep = DEFAULT_TIMESTEP;
+uint64_t min_tf = 0x3f3f3f3f;
+uint64_t min_ti = 0x3f3f3f3f;
 
 encounter::encounter(){}
 
-encounter::encounter(uint s, uint t, uint tf, uint ti, uint delta) 
+encounter::encounter(uint s, uint t, uint64_t tf, uint64_t ti, uint64_t delta) 
   : s(s), t(t), tf(tf), ti(ti), delta(delta), 
     min_day(0), max_day(0x3f3f3f3f)
   {}
 
-encounter::encounter(uint s, uint t, uint tf, uint ti, uint delta, uint day_i, uint day_f) 
+encounter::encounter(uint s, uint t, uint64_t tf, uint64_t ti, uint64_t delta, uint day_i, uint day_f) 
   : s(s), t(t), tf(tf), ti(ti), delta(delta), 
     min_day(day_i), max_day(day_f)
   {}
@@ -28,6 +28,14 @@ void encounter::calc_day(){
   
   this->min_day = ceil ( (ti - min_ti) / timestep );
   this->max_day = ceil ( (tf - min_ti) / timestep );
+}
+
+void encounter::set_s( const uint s){
+  this->s = s;
+}
+
+void encounter::set_t( const uint t){
+  this->t = t;
 }
 
 
@@ -47,24 +55,24 @@ uint encounter::get_max_day() const{
   return this->max_day;
 }
 
-uint encounter::get_tf() const{
+uint64_t encounter::get_tf() const{
   return this->tf;
 }
 
-uint encounter::get_ti() const{
+uint64_t encounter::get_ti() const{
   return this->ti;
 }
 
 
-void encounter::set_ti(uint ti){
+void encounter::set_ti(uint64_t ti){
   this->ti = ti;
 }
 
-void encounter::set_tf(uint tf){
+void encounter::set_tf(uint64_t tf){
   this->tf = tf;
 }
 
-uint encounter::get_delta() const{
+uint64_t encounter::get_delta() const{
   return this->delta;
 }
 
@@ -125,6 +133,15 @@ bool can_merge (const encounter& e1, const encounter& e2){
     e1.get_s() == e2.get_s() and
     e1.get_t() == e2.get_t() and
     (e2.get_ti() - e1.get_tf() <= 1)
+  );
+}
+
+
+bool can_merge_no_restriction(const encounter& e1, const encounter& e2){
+  return (
+    e1.get_s() == e2.get_s() and
+    e1.get_t() == e2.get_t() and
+    (e2.get_ti() <= e1.get_tf() and e2.get_tf() >= e1.get_tf())
   );
 }
 

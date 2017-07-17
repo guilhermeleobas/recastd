@@ -20,7 +20,6 @@ if __name__ == '__main__':
     path = os.path.split(filename)[0]
     trace_name = os.path.split(filename)[1].split('.')[0]
     
-
     sys.argv = [python_file, filename]
 
     gg.main()
@@ -29,7 +28,6 @@ if __name__ == '__main__':
     random_ep = get_random_ep(gg)
     to = get_to(gg)
     random_to = get_random_to(gg)
-
 
     (friends, bridges, acquaintance, random) = map_relations(ep, random_ep, to, random_to, p_rnd)
 
@@ -40,9 +38,14 @@ if __name__ == '__main__':
         os.makedirs(folder)
     if not os.path.exists(folder_images):
         os.makedirs(folder_images)
-
-    plot_ep(ep, random_ep, fname=folder_images + os.sep + 'ep.png')
-    plot_to(to, random_to, fname=folder_images + os.sep + 'to.png')
-    plot_relations(p_rnd, friends, bridges, acquaintance, random, fname=folder_images + os.sep + 'rel.png')
+    
+    plot_clustering(gg.temporal_graphs,
+            gg.random_graphs,
+            fname=folder_images + os.sep + 'cc.eps',
+            name=trace_name)
+    plot_ep(ep, random_ep, fname=folder_images + os.sep + 'ep.eps', trace_name=trace_name)
+    plot_to(to, random_to, fname=folder_images + os.sep + 'to.eps', trace_name=trace_name)
+    plot_relations(p_rnd, friends, bridges, acquaintance, random, fname=folder_images + os.sep + 'rel.eps', 
+        trace_name=trace_name)
 
     save_edges(gg, ep, random_ep, to, random_to, p_rnd, fname= folder + os.sep, ext='.txt')

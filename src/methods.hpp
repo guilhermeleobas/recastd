@@ -5,6 +5,10 @@
 extern uint max_nodes;
 extern uint max_days;
 
+void calc_t(const vector<encounter>&);
+
+void subtract_min_ti(vector<encounter>&);
+
 void merge_encounters (vector<encounter>&);
 
 void sort_encounters (vector<encounter>& v);

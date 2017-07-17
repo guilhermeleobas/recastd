@@ -29,7 +29,7 @@ import ecdf
 
 # Slow, depending on the size of the graph
 
-def plot_clustering():
+def plot_clustering(temporal_graphs, random_graphs, fname=None, name=None):
 
     def clustering(graphs):
         l = []
@@ -42,20 +42,25 @@ def plot_clustering():
             
         return l
 
-    cc_y_t = clustering(gg.temporal_graphs)
-    cc_y_r = clustering(gg.random_graphs)
+    cc_y_t = clustering(temporal_graphs)
+    cc_y_r = clustering(random_graphs)
 
-    cc_x = range(1, 30)
+    cc_x = range(0, len(temporal_graphs))
     
-    plt.plot(cc_x, cc_y_t, marker='o', label='Grafo Real')
-    plt.plot(cc_x, cc_y_r, marker='x', label='Grafo Aleatorio')
-    plt.title('coef. de clusterizacao ' + trace_name.split('_')[0])
+    plt.title("persistence " + name)
+    plt.plot(cc_x, cc_y_t, marker='o', label='Grafo Real', color='blue')
+    plt.plot(cc_x, cc_y_r, marker='x', label='Grafo Aleatorio', color='green')
+    plt.title('coef. de clusterizacao ' + name)
     plt.ylim(0, 1)
-    plt.xlim(0, 28)
+    plt.xlim(0, len(temporal_graphs))
     plt.ylabel("Coeficiente de clusterizacao")
     plt.xlabel("Tempo t (dias)")
-    plt.legend()
+    plt.legend(bbox_to_anchor=(0.98,0.05), loc=4, borderaxespad=0.)
+    # plt.legend()
     plt.grid()
+    plt.savefig (fname, format='eps')
+    plt.cla()
+    # plt.show()
 
 
 # # Edge persistence
@@ -68,9 +73,7 @@ def get_random_ep(recast):
     random_ep = classifier.get_ep(gg.random_graphs)
     return random_ep
 
-def plot_ep(ep, random_ep, fname = None):
-
-    trace_name = os.path.split(fname)[1].split('.')[0]
+def plot_ep(ep, random_ep, fname = None, trace_name=None):
 
     x = np.linspace(0.0, 1.0, 100)
 
@@ -83,14 +86,15 @@ def plot_ep(ep, random_ep, fname = None):
     # yrange = [0, 10**(-6), 10**(-3), 10**(0)]
     # ylabels = ['10^-6', '10^-3', '10^-0']
 
-    plt.plot(x, y, marker='o', label='Grafo Real')
-    plt.plot(x, y_r, marker='x', label='Grafo Aleatorio')
+    plt.plot(x, y, marker='o', label='Grafo Real', color='blue')
+    plt.plot(x, y_r, marker='x', label='Grafo Aleatorio', color='green')
 
     plt.yscale('log', basey=10)
     plt.xlim(0, 1)
     plt.ylim ([10**(-7), 10**(0)])
+    print trace_name
 
-    plt.title("persistence " + trace_name.split('_')[0])
+    plt.title("persistence " + trace_name)
 
     plt.ylabel('$P[per(i, j) > x]$')
     plt.xlabel('$x$ [persistence]')
@@ -98,7 +102,7 @@ def plot_ep(ep, random_ep, fname = None):
     plt.legend(bbox_to_anchor=(0.98,0.05), loc=4, borderaxespad=0.)
     # plt.legend()
     plt.grid()
-    plt.savefig (fname)
+    plt.savefig (fname, format='eps')
     plt.cla()
     # plt.show()
 
@@ -113,9 +117,7 @@ def get_random_to(recast):
     random_to = classifier.get_to(gg.random_aggregated_graph)
     return random_to
 
-def plot_to(to, random_to, fname=None):
-
-    trace_name = os.path.split(fname)[1].split('.')[0]
+def plot_to(to, random_to, fname=None, trace_name=None):
 
     x = np.linspace(0.0, 1.0, 100)
 
@@ -128,8 +130,8 @@ def plot_to(to, random_to, fname=None):
     # yrange = [0, 10**(-6), 10**(-3), 10**(0)]
     # ylabels = ['10^-6', '10^-3', '10^-0']
 
-    plt.plot(x, y, marker='o', label='Grafo Real')
-    plt.plot(x, y_r, marker='x', label='Grafo Aleatorio')
+    plt.plot(x, y, marker='o', label='Grafo Real', color='blue')
+    plt.plot(x, y_r, marker='x', label='Grafo Aleatorio', color='green')
 
     plt.yscale('log', basey=10)
     plt.xlim(0, 1)
@@ -144,7 +146,7 @@ def plot_to(to, random_to, fname=None):
     plt.legend(bbox_to_anchor=(0.05, 0.1), loc='lower left', borderaxespad=0.)
     # plt.legend()
     plt.grid()
-    plt.savefig (fname)
+    plt.savefig (fname, format='eps')
     plt.cla()
     # plt.show()  
 
@@ -249,14 +251,12 @@ def map_relations (ep, random_ep, to, random_to, p_rnd):
 
     return (friends, bridges, acquaintance, random)
 
-def plot_relations (p_rnd, friends, bridges, acquaintance, random, fname=None):
+def plot_relations (p_rnd, friends, bridges, acquaintance, random, fname=None, trace_name=None):
 
-    trace_name = os.path.split(fname)[1].split('.')[0]
-
-    plt.plot(p_rnd, friends, marker='x', label='Amigos', color='blue')
-    plt.plot(p_rnd, bridges, marker='+', label='Pontes', color='red')
-    plt.plot(p_rnd, acquaintance, marker='s', label='Conhecidos', color='gray')
-    plt.plot(p_rnd, random, marker='o', label='Desconhecidos', color='orange')
+    plt.plot(p_rnd, friends, marker='x', label='Amigos', color='#22941a')
+    plt.plot(p_rnd, bridges, marker='+', label='Pontes', color='#fc6907')
+    plt.plot(p_rnd, acquaintance, marker='s', label='Conhecidos', color='#1661a7')
+    plt.plot(p_rnd, random, marker='o', label='Desconhecidos', color='#cc0d19')
 
     # plt.xticks(p_rnd)
 
@@ -275,6 +275,6 @@ def plot_relations (p_rnd, friends, bridges, acquaintance, random, fname=None):
 
     plt.legend(bbox_to_anchor=(0.97, 0.97), loc='upper right', borderaxespad=0.)
 
-    plt.savefig (fname)
+    plt.savefig (fname, format='eps')
     plt.cla()
 

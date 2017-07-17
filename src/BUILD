@@ -6,6 +6,14 @@ cc_library (
   hdrs = ["encounter.hpp", "debug.hpp"],
 )
 
+cc_library (
+  name = "small_queue",
+  hdrs = ["small_queue.hpp", "debug.hpp"],
+  deps = [
+    ":encounter",
+  ]
+)
+
 cc_library(
   name = "parser",
   srcs = ["parser.cpp"],
@@ -48,6 +56,7 @@ cc_library (
   hdrs = ["roaring.h", "roaring.hh", "roaring.c", "graph.hpp", "debug.hpp", "methods.hpp"],
   deps = [
     ":encounter",
+    ":small_queue",
   ],
   copts = ["-march=native", "-O3", "-std=c++14"],
 )
@@ -64,7 +73,7 @@ cc_binary(
 
 cc_binary(
   name = "recastd",
-  srcs = ["main.cpp"],
+  srcs = ["main.cpp", "argh.h"],
   deps = [
     "pqueue",
     "linesweep",

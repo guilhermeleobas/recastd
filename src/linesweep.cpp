@@ -80,6 +80,10 @@ void line_sweep::delete_encounter(const encounter& enc1){
   node s = enc1.get_s(), t = enc1.get_t();
   node_map[s].erase(t);
   node_map[t].erase(s);
+  
+  if (DEBUG){
+    cout << s << ' ' << t << '\n';
+  }
 
   assert (encounter_map.find(make_pair(s, t)) != encounter_map.end());
   assert (encounter_map.find(make_pair(t, s)) != encounter_map.end());

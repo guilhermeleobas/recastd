@@ -1,6 +1,8 @@
 #include "debug.hpp"
 #include "graph.hpp"
 
+#include "small_queue.hpp"
+
 #include <cassert>
 #include <queue>
 #include <iostream>
@@ -8,16 +10,15 @@
 
 #include "roaring.c"
 
-inline int calc_node(const int pos) { return pos / max_nodes; }
+inline int calc_node(const int pos) { return floor(pos / max_days); }
 
-inline int calc_day(const int pos) { return pos % max_nodes; }
+inline int calc_day(const int pos) { return pos % max_days; }
 
 graph::graph() {}
 
-graph::graph(const uint person, const uint max_days, const uint max_nodes) {
-  // g[person] = unordered_set<encounter, encounter::hash>();
-  this->person = person;
-  gg = vector<Roaring>(max_nodes + 1);
+graph::graph(const uint ego, const uint max_days, const uint max_nodes) {
+  this->ego = ego;
+  gg = vector<Roaring>(max_nodes);
   for (auto &&r : gg) {
     r.setCopyOnWrite(true);
   }
@@ -25,20 +26,41 @@ graph::graph(const uint person, const uint max_days, const uint max_nodes) {
   latest = 0;
 }
 
-void graph::set_person(const node person) { this->person = person; }
+graph::graph(const uint ego, const uint max_days, const uint max_nodes,
+             const uint max_len) {
+
+  this->ego = ego;
+  gg = vector<Roaring>(max_nodes);
+  for (auto &&r : gg) {
+    r.setCopyOnWrite(true);
+  }
+
+  latest = 0;
+  // graph(ego, max_days, max_nodes);
+  sq = small_queue<encounter>(max_len);
+}
+
+void graph::add_encounter_to_queue(const encounter &e) { this->sq.push(e); }
+
+void graph::set_ego(const node ego) { this->ego = ego; }
 
 void graph::add_encounter(const encounter &e) {
-  if (DEBUG) cout << "[Graph: " << person << "] Adding: " << e << endl;
+  if (DEBUG) cout << "[Graph: " << this->ego << "] Adding: " << e << endl;
 
   for (uint day = e.get_min_day(); day <= e.get_max_day(); day++) {
 
-    node n = (e.get_s() == person) ? e.get_t() : e.get_s();
-    gg[person].add(max_nodes * n + day);
-    gg[n].add(max_nodes*person + day);
+    node s = e.get_s(), t = e.get_t();
+
+    // node n = (e.get_s() == ego) ? e.get_t() : e.get_s();
+    gg[s].add(max_days * t + day);
+    gg[t].add(max_days * s + day);
 
     if (DEBUG) {
-      cout << "\t[Row: " << person << "] Set: " << max_nodes *n + day << ' '
-           << " node: " << n << " day: " << day << '\n';
+      cout << "\t[Graph: " << this->ego << '\n';
+      cout << "\t\tRow: " << s << "] Set: " << max_days * t + day << ' '
+           << " node: " << t << " day: " << day << " max_days: " << max_days << '\n';
+      cout << "\t\tRow: " << t << "] Set: " << max_days * s + day << ' '
+           << " node: " << s << " day: " << day << " max_days: " << max_days << '\n';
     }
   }
 
@@ -51,7 +73,7 @@ void graph::add_encounter(const encounter &e0, const encounter &e1,
   // b -> c => enc1
   // c -> a => enc2
   if (DEBUG) {
-    cout << "[Graph: " << person << " clique]: " << endl;
+    cout << "[Graph: " << ego << " clique]: " << endl;
     cout << '\t' << e0 << '\n';
     cout << '\t' << e1 << '\n';
     cout << '\t' << e2 << '\n';
@@ -69,8 +91,8 @@ void graph::dump(ofstream &f) {
     if (gg[i].cardinality() == 0) continue;
 
     vector<encounter> v;
-    
-    for (auto bs : gg[i]){
+
+    for (auto bs : gg[i]) {
       int s = i;
       int t = calc_node(bs);
       int day_i = calc_day(bs);
@@ -79,61 +101,123 @@ void graph::dump(ofstream &f) {
       int ti = timestep * day_i;
       int delta = tf - ti;
 
+      if (DEBUG)
+        cout << "cout " << encounter(s, t, tf, ti, delta, day_i, day_f)
+             << " with " << bs << " max_days: " << max_days << '\n';
+
       v.push_back(encounter(s, t, tf, ti, delta, day_i, day_f));
     }
 
     merge_encounters(v);
 
-    for (const encounter &e : v)
-      f << e << '\n';
+    for (const encounter &e : v) f << e << '\n';
   }
 }
 
 node graph::get_latest() const { return this->latest; }
 
-node graph::get_person() const { return this->person; }
+node graph::get_ego() const { return this->ego; }
 
 void graph::set_latest(const node n) { this->latest = n; }
 
-void merge_graphs(graph &g1, graph &g2, bool share_graph, ofstream &f) {
-  if (g1.get_latest() == g2.get_person() &&
-      g2.get_latest() == g1.get_person()) {
+const small_queue<encounter> &graph::get_small_queue() const {
+  return this->sq;
+}
+small_queue<encounter> &graph::get_small_queue() { return this->sq; }
+
+// last k encounters strategy
+void merge_graphs_share_last_k(graph &g1, graph &g2, string share_graph,
+                               ofstream &f) {
+  assert(share_graph == "lastk");
+
+  if (g1.get_latest() == g2.get_ego() && g2.get_latest() == g1.get_ego()) {
     // cout << "chegou aqui\n";
     return;
   }
 
-  node pa = g1.get_person();
-  node pb = g2.get_person();
+  node pa = g1.get_ego();
+  node pb = g2.get_ego();
 
-  if (share_graph){
-    uint64_t len_g1 = 0, len_g2 = 0;
-    
-    for (uint i = 0; i < max_nodes; i++) {
-      len_g1 += g1[i].cardinality();
-      len_g2 += g2[i].cardinality();
-      g1[i] |= g2[i];
-    }
-    g2 = g1;
-    f << len_g1 << '\n' << len_g2 << '\n';
-    g2.set_person(pb);
-  }
-  else{
-    // share neighbors
-    f << g2[g2.get_person()].cardinality() << ' ' << g1[g1.get_person()].cardinality() << '\n';
-    g1[g2.get_person()] |= g2[g2.get_person()];
-    g2[g1.get_person()] |= g1[g1.get_person()];
+  small_queue<encounter> &qa = g1.get_small_queue();
+  small_queue<encounter> &qb = g2.get_small_queue();
+
+  // cout << "size qa: " << qa.size() << '\n';
+  // cout << "size qb: " << qb.size() << '\n';
+
+  for (const encounter &e : qa) {
+    // cout << "chegou aqui1\n";
+    g2.add_encounter(e);
   }
 
+  for (const encounter &e : qb) {
+    // cout << "chegou aqui2\n";
+    g1.add_encounter(e);
+  }
+
+  for (uint i = 0; i < qa.size() && qb.size() < qb.get_max_len(); i++) {
+    encounter e = qa[i];
+    // cout << "Pushing " << e << '\n';
+    qb.push(e);
+  }
+
+  for (uint i = 0; i < qb.size() && qa.size() < qa.get_max_len(); i++) {
+    encounter e = qb[i];
+    qa.push(e);
+  }
+
+  // cout << qa.size() << ' ' << qb.size() << '\n';
+  
+  // cout << "passou\n";
+  
+  g1.set_latest(pb);
+  g2.set_latest(pa);
+}
+
+void merge_graphs_share_graph(graph &g1, graph &g2, string share_graph,
+                              ofstream &f) {
+  assert(share_graph == "graph");
+
+  if (g1.get_latest() == g2.get_ego() && g2.get_latest() == g1.get_ego()) {
+    // cout << "chegou aqui\n";
+    return;
+  }
+
+  node pa = g1.get_ego();
+  node pb = g2.get_ego();
+
+  uint64_t len_g1 = 0, len_g2 = 0;
+
+  for (uint i = 0; i < max_nodes; i++) {
+    len_g1 += g1[i].cardinality();
+    len_g2 += g2[i].cardinality();
+    g1[i] |= g2[i];
+  }
+  g2 = g1;
+  f << len_g1 << '\n' << len_g2 << '\n';
+  g2.set_ego(pb);
 
   g1.set_latest(pb);
   g2.set_latest(pa);
 }
 
-// graph merge_graphs(const graph &g1, const graph &g2, const graph &g3) {
-//   graph g = g1;
-//   for (uint i = 0; i < max_nodes; i++) {
-//     g[i] |= g2[i];
-//     g[i] |= g3[i];
-//   }
-//   return g;
-// }
+void merge_graphs_share_neighbors(graph &g1, graph &g2, string share_graph,
+                                  ofstream &f) {
+  assert(share_graph == "neighbors");
+
+  if (g1.get_latest() == g2.get_ego() && g2.get_latest() == g1.get_ego()) {
+    // cout << "chegou aqui\n";
+    return;
+  }
+
+  node pa = g1.get_ego();
+  node pb = g2.get_ego();
+
+  // share neighbors
+  f << g2[g2.get_ego()].cardinality() << ' ' << g1[g1.get_ego()].cardinality()
+    << '\n';
+  g1[g2.get_ego()] |= g2[g2.get_ego()];
+  g2[g1.get_ego()] |= g1[g1.get_ego()];
+
+  g1.set_latest(pb);
+  g2.set_latest(pa);
+}

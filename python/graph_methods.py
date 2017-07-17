@@ -75,19 +75,11 @@ def get_temporal_graphs (f):
         # node_from, node_to, time_begin, time_end
         arr = map(lambda x: ' '.join(x), v)
         
-        try:
-            egraph = nx.parse_edgelist (arr, 
-                                       nodetype=int, 
-                                       data=(('tf', int), ('ti', int), ('delta', int), ('day_i', int), ('day_f', int)),
-                                       create_using=nx.Graph())
-        except:
-            egraph = nx.parse_edgelist(arr,
-                                       nodetype=int,
-                                       data=(('weight', int), ),
-                                       create_using=nx.Graph())
-
+        egraph = nx.parse_edgelist (arr, 
+                                   nodetype=int, 
+                                   data=(('tf', int), ('ti', int), ('delta', int), ('day_i', int), ('day_f', int)),
+                                   create_using=nx.Graph())
+        # print 'gen for k={}'.format(k)
         temporal_graphs[k] = egraph
-        
-        # print 'generated event graph [#edges = {}] for timestep {}'.format(egraph.size(), k)
     
     return temporal_graphs

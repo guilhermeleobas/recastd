@@ -5,8 +5,9 @@
 #include <map>
 #include <fstream>
 #include <functional>
-#include <boost/dynamic_bitset.hpp>
+#include <queue>
 
+#include "small_queue.hpp"
 #include "encounter.hpp"
 
 #include "roaring.hh"
@@ -14,7 +15,7 @@
 
 using std::vector;
 using std::map;
-using std::unordered_set;
+using std::queue;
 
 typedef unsigned int uint;
 typedef uint node;
@@ -24,32 +25,28 @@ typedef pair<uint, uint> edge;
 
 class graph {
  private:
-  // similar to a star graph
-  // map<node, unordered_set<encounter, encounter::hash> > g;
-  // typedef unordered_set<weak_ptr<encounter>, encounter::hash,
-                        // encounter::my_compare> muset;  // my unordered set
-
-
-  // typedef set<int> muset;
-  // muset g;
-  
-  // typedef vector<vector<bitset<28>>> tgraph;
   typedef vector<Roaring> tgraph;
 
-  node person;
+  node ego;
   tgraph gg;
-
   node latest;
+  
+  small_queue<encounter> sq;
 
  public:
   graph();
-  graph(const uint person, const uint max_days, const uint max_nodes);
+  graph(const uint ego, const uint max_days, const uint max_nodes);
+  graph(const uint ego, const uint max_days, const uint max_nodes, const uint max_len);
   
   node get_latest() const;
-  node get_person() const;
-  void set_person (const node);
+  node get_ego() const;
+  void set_ego (const node);
   void set_latest(const node n);
-
+  
+  const small_queue<encounter>& get_small_queue() const;
+  small_queue<encounter>& get_small_queue();
+  void add_encounter_to_queue(const encounter&);
+  
   void add_encounter(const encounter&);
   void add_encounter(const encounter&, const encounter&, const encounter&);
 
@@ -78,5 +75,6 @@ class graph {
 
 };
 
-void merge_graphs (graph&, graph&, bool share_graph, ofstream&);
-// graph merge_graphs (const graph&, const graph&, const graph&);
+void merge_graphs_share_graph (graph&, graph&, string share_graph, ofstream&);
+void merge_graphs_share_neighbors (graph&, graph&, string share_graph, ofstream&);
+void merge_graphs_share_last_k (graph&, graph&, string share_graph, ofstream&);
